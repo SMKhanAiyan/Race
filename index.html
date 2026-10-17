@@ -1,0 +1,4390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Baby Animal Derby - Smooth & Competitive Straight Track Running</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --font-main: 'Fredoka', 'Quicksand', 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+            --bg-primary: #eef6f9;
+            --bg-card: rgba(255, 255, 255, 0.96);
+            --bg-overlay: rgba(255, 255, 255, 0.97);
+            --text-primary: #2d3436;
+            --text-secondary: #636e72;
+            --accent: #ff4757;
+            --accent-hover: #ff6b81;
+            --accent-green: #2ed573;
+            --accent-blue: #1e90ff;
+            --accent-gold: #ffa502;
+            --border-color: #dcdde1;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            --hud-bg: rgba(255, 255, 255, 0.92);
+        }
+
+        body.theme-dark {
+            --bg-primary: #0b0f14;
+            --bg-card: rgba(22, 28, 38, 0.96);
+            --bg-overlay: rgba(16, 22, 32, 0.97);
+            --text-primary: #f5f6fa;
+            --text-secondary: #a4b0be;
+            --accent: #ff4757;
+            --accent-hover: #ff6b81;
+            --accent-green: #2ed573;
+            --accent-blue: #70a1ff;
+            --accent-gold: #feca57;
+            --border-color: #2f3542;
+            --card-shadow: 0 12px 36px rgba(0, 0, 0, 0.55);
+            --hud-bg: rgba(20, 26, 36, 0.92);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        #gameContainer {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #gameCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* TOP BAR */
+        .top-bar {
+            position: absolute;
+            top: 16px;
+            right: 20px;
+            z-index: 100;
+            display: flex;
+            gap: 10px;
+        }
+
+        .top-bar-btn {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 2px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 24px;
+            font-family: var(--font-main);
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .top-bar-btn:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent);
+        }
+
+        /* SCREEN OVERLAYS */
+        .screen-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: var(--bg-overlay);
+            backdrop-filter: blur(8px);
+            padding: 20px;
+            overflow-y: auto;
+            transition: opacity 0.3s ease;
+        }
+
+        .menu-title-box {
+            text-align: center;
+            margin-bottom: 16px;
+            animation: bounceTitle 2.2s infinite ease-in-out;
+        }
+
+        @keyframes bounceTitle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+
+        .menu-title-badge {
+            display: inline-block;
+            background: var(--accent-gold);
+            color: #2d3436;
+            font-weight: 800;
+            font-size: 12px;
+            padding: 4px 12px;
+            border-radius: 12px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .menu-main-title {
+            font-size: 42px;
+            font-weight: 900;
+            color: var(--accent);
+            text-shadow: 2px 3px 0px rgba(0,0,0,0.12);
+            line-height: 1.1;
+        }
+
+        .menu-subtitle {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-top: 5px;
+        }
+
+        /* TIMER SETTING ROW ON MENU */
+        .timer-options-container {
+            width: 100%;
+            max-width: 780px;
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            border-radius: 20px;
+            padding: 12px 18px;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .timer-label {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .timer-btn-group {
+            display: flex;
+            background: var(--bg-primary);
+            border-radius: 16px;
+            padding: 3px;
+            border: 1px solid var(--border-color);
+            gap: 4px;
+            align-items: center;
+        }
+
+        .timer-btn {
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-family: var(--font-main);
+            font-size: 13px;
+            font-weight: 700;
+            padding: 6px 14px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .timer-btn.active {
+            background: var(--accent-gold);
+            color: #2d3436;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        }
+
+        .custom-timer-input {
+            width: 60px;
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            padding: 4px 6px;
+            font-family: var(--font-main);
+            font-weight: 800;
+            font-size: 13px;
+            text-align: center;
+            color: var(--text-primary);
+            outline: none;
+        }
+
+        /* 5 THEMED MAPS */
+        .track-selection-container {
+            width: 100%;
+            max-width: 980px;
+            margin-bottom: 14px;
+        }
+
+        .section-label {
+            font-size: 13px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .track-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .track-card {
+            background: var(--bg-card);
+            border: 3px solid var(--border-color);
+            border-radius: 18px;
+            padding: 12px 10px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: var(--card-shadow);
+            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .track-card:hover {
+            transform: translateY(-4px) scale(1.02);
+            border-color: var(--accent-blue);
+        }
+
+        .track-card.active {
+            border-color: var(--accent);
+            background: rgba(255, 71, 87, 0.08);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 71, 87, 0.25);
+        }
+
+        .track-icon {
+            font-size: 32px;
+            margin-bottom: 4px;
+        }
+
+        .track-name {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .track-desc {
+            font-size: 11px;
+            color: var(--text-secondary);
+            line-height: 1.2;
+        }
+
+        /* MENU BUTTONS */
+        .menu-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ff4757, #ff6b81);
+            color: #ffffff;
+            border: none;
+            font-family: var(--font-main);
+            font-size: 18px;
+            font-weight: 800;
+            padding: 12px 34px;
+            border-radius: 32px;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(255, 71, 87, 0.35);
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 12px 28px rgba(255, 71, 87, 0.45);
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 2px solid var(--border-color);
+            font-family: var(--font-main);
+            font-size: 15px;
+            font-weight: 700;
+            padding: 12px 22px;
+            border-radius: 32px;
+            cursor: pointer;
+            box-shadow: var(--card-shadow);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent-blue);
+            transform: translateY(-2px);
+        }
+
+        /* 10-SECOND CONTROLS PREVIEW MODAL */
+        #controlsPromptModal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 85;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(6px);
+            padding: 20px;
+        }
+
+        .controls-card {
+            background: var(--bg-card);
+            border: 4px solid var(--accent-gold);
+            border-radius: 28px;
+            padding: 28px 36px;
+            max-width: 620px;
+            width: 95%;
+            text-align: center;
+            box-shadow: 0 16px 40px rgba(0,0,0,0.3);
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.85); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .controls-card-title {
+            font-size: 28px;
+            font-weight: 900;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+
+        .controls-timer-pill {
+            display: inline-block;
+            background: var(--accent-gold);
+            color: #2d3436;
+            font-weight: 800;
+            font-size: 13px;
+            padding: 4px 14px;
+            border-radius: 12px;
+            margin-bottom: 18px;
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 14px;
+            text-align: left;
+            margin-bottom: 22px;
+        }
+
+        .ctrl-item {
+            background: var(--bg-primary);
+            border: 2px solid var(--border-color);
+            border-radius: 16px;
+            padding: 12px 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .ctrl-key-badge {
+            background: var(--text-primary);
+            color: var(--bg-card);
+            font-weight: 900;
+            font-size: 13px;
+            padding: 6px 10px;
+            border-radius: 8px;
+            min-width: 65px;
+            text-align: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+
+        .ctrl-desc {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1.25;
+        }
+
+        .btn-skip {
+            background: linear-gradient(135deg, #2ed573, #10ac84);
+            color: #ffffff;
+            border: none;
+            font-family: var(--font-main);
+            font-size: 20px;
+            font-weight: 900;
+            padding: 14px 44px;
+            border-radius: 32px;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(46, 213, 115, 0.4);
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-skip:hover {
+            transform: translateY(-3px) scale(1.04);
+            box-shadow: 0 12px 28px rgba(46, 213, 115, 0.5);
+        }
+
+        /* CUSTOMIZE ROSTER SCREEN */
+        .custom-roster-box {
+            width: 100%;
+            max-width: 980px;
+            background: var(--bg-card);
+            border-radius: 24px;
+            padding: 22px;
+            border: 2px solid var(--border-color);
+            box-shadow: var(--card-shadow);
+            margin-bottom: 16px;
+        }
+
+        .roster-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-bottom: 14px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .roster-title {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+
+        .roster-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 12px;
+            max-height: 52vh;
+            overflow-y: auto;
+            padding: 4px;
+        }
+
+        .roster-card {
+            background: var(--bg-primary);
+            border: 2px solid var(--border-color);
+            border-radius: 16px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .roster-card.disabled {
+            opacity: 0.45;
+            filter: grayscale(0.8);
+        }
+
+        .roster-card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .roster-animal-avatar {
+            font-size: 32px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 38px;
+            height: 22px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #cbd5e1;
+            transition: .3s;
+            border-radius: 22px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px; width: 16px;
+            left: 3px; bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--accent-green);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(16px);
+        }
+
+        .roster-name-input {
+            width: 100%;
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            font-weight: 800;
+            font-size: 14px;
+            padding: 6px 8px;
+            border-radius: 8px;
+            outline: none;
+        }
+
+        .type-toggle-group {
+            display: flex;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .type-btn {
+            flex: 1;
+            border: none;
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            font-family: var(--font-main);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 6px 0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .type-btn.active.human {
+            background: var(--accent);
+            color: #ffffff;
+        }
+
+        .type-btn.active.bot {
+            background: var(--accent-blue);
+            color: #ffffff;
+        }
+
+        .animal-select, .anim-style-select {
+            width: 100%;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            font-weight: 700;
+            font-size: 12px;
+            padding: 6px 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            outline: none;
+        }
+
+        /* IN-GAME HUD */
+        #gameHUD {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 40;
+            display: none;
+        }
+
+        .hud-top-left {
+            position: absolute;
+            top: 18px;
+            left: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .hud-position-badge {
+            background: var(--hud-bg);
+            border: 3px solid var(--accent-gold);
+            border-radius: 18px;
+            padding: 6px 16px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: baseline;
+            gap: 4px;
+        }
+
+        .rank-number {
+            font-size: 34px;
+            font-weight: 900;
+            color: var(--accent-gold);
+            line-height: 1;
+        }
+
+        .rank-suffix {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--text-secondary);
+        }
+
+        .hud-timer-badge {
+            background: var(--hud-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 16px;
+            padding: 8px 16px;
+            font-size: 18px;
+            font-weight: 900;
+            color: var(--accent);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .hud-pause-btn {
+            position: absolute;
+            top: 18px;
+            right: 20px;
+            background: var(--hud-bg);
+            color: var(--text-primary);
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            font-weight: 800;
+            cursor: pointer;
+            pointer-events: auto;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .hud-pause-btn:hover {
+            transform: scale(1.08);
+            border-color: var(--accent);
+        }
+
+        .hud-item-slot {
+            position: absolute;
+            top: 18px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 62px;
+            height: 62px;
+            background: var(--hud-bg);
+            border: 3px solid var(--accent);
+            border-radius: 18px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 34px;
+            box-shadow: 0 8px 24px rgba(255, 71, 87, 0.3);
+        }
+
+        .hud-item-slot.roulette-spin {
+            animation: rouletteJiggle 0.15s infinite;
+        }
+
+        @keyframes rouletteJiggle {
+            0% { transform: translateX(-50%) rotate(-3deg); }
+            50% { transform: translateX(-50%) rotate(3deg); }
+            100% { transform: translateX(-50%) rotate(-3deg); }
+        }
+
+        /* --- SPEEDOMETER GAUGE (BOTTOM RIGHT) --- */
+        .hud-bottom-right {
+            position: absolute;
+            bottom: 24px;
+            right: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+        }
+
+        .speedometer-card {
+            background: var(--hud-bg);
+            border: 3px solid var(--border-color);
+            border-radius: 20px;
+            padding: 8px 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+        }
+
+        #speedDialCanvas {
+            display: block;
+            width: 70px;
+            height: 50px;
+        }
+
+        .speed-text-box {
+            text-align: right;
+        }
+
+        .speed-number {
+            font-size: 26px;
+            font-weight: 900;
+            color: var(--accent-green);
+            line-height: 1;
+        }
+
+        .speed-unit {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--text-secondary);
+            letter-spacing: 0.5px;
+        }
+
+        .hud-distance {
+            background: var(--hud-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 4px 10px;
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--accent-blue);
+        }
+
+        .hud-controls-hint {
+            background: rgba(0,0,0,0.65);
+            color: #ffffff;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        /* --- SIDE DISTANCE MAP / TRACK RADAR (LEFT SIDE) --- */
+        .side-radar-container {
+            position: absolute;
+            top: 90px;
+            left: 20px;
+            background: var(--hud-bg);
+            border: 3px solid var(--border-color);
+            border-radius: 22px;
+            padding: 10px 8px;
+            width: 68px;
+            height: 52vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+
+        .side-radar-title {
+            font-size: 9px;
+            font-weight: 900;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .side-radar-track {
+            position: relative;
+            flex: 1;
+            width: 14px;
+            background: var(--bg-primary);
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+        }
+
+        .radar-finish-flag {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 16px;
+        }
+
+        .radar-avatar-node {
+            position: absolute;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 16px;
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            transition: top 0.15s ease-out;
+        }
+
+        .radar-avatar-node.is-player {
+            border: 2.5px solid var(--accent);
+            transform: translate(-50%, -50%) scale(1.22);
+            z-index: 10;
+            box-shadow: 0 0 12px rgba(255, 71, 87, 0.7);
+        }
+
+        /* =====================================================================
+           DEDICATED MOBILE FOOTER CONTROLS FOR TOUCHSCREEN SMARTPHONES
+           ===================================================================== */
+        :root {
+            --touch-footer-h: 130px;
+            --touch-btn-size: 78px;
+            --touch-btn-gas-size: 88px;
+            --touch-btn-font: 28px;
+            --touch-sub-font: 11px;
+            --touch-opacity: 0.96;
+        }
+
+        body.btn-size-normal {
+            --touch-btn-size: 68px;
+            --touch-btn-gas-size: 78px;
+            --touch-btn-font: 24px;
+            --touch-sub-font: 10px;
+            --touch-footer-h: 115px;
+        }
+
+        body.btn-size-large {
+            --touch-btn-size: 80px;
+            --touch-btn-gas-size: 92px;
+            --touch-btn-font: 30px;
+            --touch-sub-font: 11px;
+            --touch-footer-h: 135px;
+        }
+
+        body.btn-size-jumbo {
+            --touch-btn-size: 92px;
+            --touch-btn-gas-size: 106px;
+            --touch-btn-font: 36px;
+            --touch-sub-font: 12px;
+            --touch-footer-h: 155px;
+        }
+
+        body.btn-opacity-50 .mobile-footer-bar { --touch-opacity: 0.55; }
+        body.btn-opacity-75 .mobile-footer-bar { --touch-opacity: 0.78; }
+        body.btn-opacity-90 .mobile-footer-bar { --touch-opacity: 0.92; }
+        body.btn-opacity-100 .mobile-footer-bar { --touch-opacity: 1.0; }
+
+        .mobile-footer-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            display: none;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding: 8px 16px max(12px, env(safe-area-inset-bottom, 12px)) 16px;
+            background: linear-gradient(to top, rgba(12, 17, 30, 0.82) 0%, rgba(12, 17, 30, 0.45) 75%, transparent 100%);
+            pointer-events: none;
+            z-index: 85;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+            opacity: var(--touch-opacity);
+            transition: opacity 0.2s ease;
+        }
+
+        body.mobile-mode-always .mobile-footer-bar {
+            display: flex !important;
+        }
+
+        body.mobile-mode-off .mobile-footer-bar {
+            display: none !important;
+        }
+
+        @media (pointer: coarse), (max-width: 900px) {
+            body:not(.mobile-mode-off) .mobile-footer-bar {
+                display: flex !important;
+            }
+        }
+
+        body.touch-swap-hands .mobile-footer-bar {
+            flex-direction: row-reverse !important;
+        }
+
+        .touch-cluster {
+            display: flex;
+            pointer-events: auto;
+            align-items: flex-end;
+        }
+
+        .touch-cluster.left-cluster {
+            gap: 12px;
+        }
+
+        .touch-cluster.right-cluster {
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+        }
+
+        .touch-sub-row {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        .touch-main-row {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            align-items: flex-end;
+        }
+
+        .touch-center-cluster {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            pointer-events: auto;
+            margin-bottom: 6px;
+        }
+
+        .touch-pill-btn {
+            background: rgba(20, 26, 42, 0.9);
+            border: 2px solid var(--border-color);
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            font-weight: 800;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            touch-action: none;
+            transition: all 0.15s ease;
+        }
+
+        .touch-pill-btn:active, .touch-pill-btn.active-press {
+            transform: scale(0.92);
+            border-color: var(--accent);
+        }
+
+        .touch-pill-btn.auto-run-active {
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+            background: rgba(16, 185, 129, 0.18);
+            box-shadow: 0 0 14px rgba(16, 185, 129, 0.4);
+        }
+
+        .touch-pill-btn .pill-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #94a3b8;
+            transition: background 0.2s ease;
+        }
+
+        .touch-pill-btn.auto-run-active .pill-dot {
+            background: var(--accent-green);
+            box-shadow: 0 0 8px var(--accent-green);
+            animation: pulseDot 1s infinite alternate;
+        }
+
+        @keyframes pulseDot {
+            0% { transform: scale(0.85); opacity: 0.7; }
+            100% { transform: scale(1.25); opacity: 1; }
+        }
+
+        /* TACTILE TOUCH BUTTONS */
+        .touch-btn {
+            background: rgba(28, 36, 56, 0.9);
+            border: 3px solid rgba(255, 255, 255, 0.22);
+            border-radius: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+            box-shadow: 0 8px 22px rgba(0,0,0,0.4), inset 0 2px 4px rgba(255, 255, 255, 0.15);
+            transition: transform 0.08s ease, filter 0.08s ease, border-color 0.08s ease, box-shadow 0.08s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .touch-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 40%;
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0.18), transparent);
+            pointer-events: none;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .touch-btn:active, .touch-btn.active-press {
+            transform: scale(0.91);
+            filter: brightness(1.25);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+        }
+
+        .touch-icon {
+            font-size: var(--touch-btn-font);
+            line-height: 1;
+            pointer-events: none;
+        }
+
+        .touch-label {
+            font-size: var(--touch-sub-font);
+            font-weight: 900;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-top: 2px;
+            pointer-events: none;
+            color: rgba(255, 255, 255, 0.9);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+        }
+
+        /* STEERING BUTTONS */
+        .touch-btn-steer {
+            width: var(--touch-btn-size);
+            height: var(--touch-btn-size);
+            background: radial-gradient(circle at 35% 30%, #334155, #1e293b);
+            border-color: rgba(56, 189, 248, 0.45);
+        }
+
+        .touch-btn-steer .touch-icon {
+            color: #38bdf8;
+            text-shadow: 0 0 12px rgba(56, 189, 248, 0.6);
+        }
+
+        .touch-btn-steer:active, .touch-btn-steer.active-press {
+            background: #0284c7;
+            border-color: #ffffff;
+            box-shadow: 0 0 16px rgba(56, 189, 248, 0.8);
+        }
+
+        /* PRIMARY RUN / TROT BUTTON */
+        .touch-btn-run {
+            width: var(--touch-btn-gas-size);
+            height: var(--touch-btn-gas-size);
+            background: radial-gradient(circle at 35% 30%, #10b981, #059669);
+            border: 3.5px solid #a7f3d0;
+            border-radius: 28px;
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.45), inset 0 2px 6px rgba(255,255,255,0.3);
+        }
+
+        .touch-btn-run .touch-icon {
+            font-size: calc(var(--touch-btn-font) + 6px);
+        }
+
+        .touch-btn-run:active, .touch-btn-run.active-press {
+            background: #047857;
+            border-color: #ffffff;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.9);
+        }
+
+        /* ZOOMIE DASH BOOST */
+        .touch-btn-dash {
+            width: var(--touch-btn-size);
+            height: var(--touch-btn-size);
+            background: radial-gradient(circle at 35% 30%, #3b82f6, #1d4ed8);
+            border: 3px solid #bfdbfe;
+        }
+
+        .touch-btn-dash .touch-icon {
+            color: #fef08a;
+            text-shadow: 0 0 10px rgba(254, 240, 138, 0.8);
+        }
+
+        .touch-btn-dash:active, .touch-btn-dash.active-press {
+            background: #1e40af;
+            border-color: #ffffff;
+            box-shadow: 0 0 16px rgba(59, 130, 246, 0.8);
+        }
+
+        /* ITEM BUTTON */
+        .touch-btn-item {
+            width: calc(var(--touch-btn-size) * 0.84);
+            height: calc(var(--touch-btn-size) * 0.84);
+            background: radial-gradient(circle at 35% 30%, #ef4444, #b91c1c);
+            border: 2.5px solid #fecaca;
+            border-radius: 20px;
+        }
+
+        .touch-btn-item .touch-icon {
+            font-size: calc(var(--touch-btn-font) * 0.9);
+        }
+
+        .touch-btn-item:active, .touch-btn-item.active-press {
+            background: #991b1b;
+            border-color: #ffffff;
+            box-shadow: 0 0 16px rgba(239, 68, 68, 0.8);
+        }
+
+        /* BRAKE / SLOW DOWN BUTTON */
+        .touch-btn-brake {
+            width: calc(var(--touch-btn-size) * 0.84);
+            height: calc(var(--touch-btn-size) * 0.84);
+            background: radial-gradient(circle at 35% 30%, #f59e0b, #b45309);
+            border: 2.5px solid #fde68a;
+            border-radius: 20px;
+        }
+
+        .touch-btn-brake .touch-icon {
+            font-size: calc(var(--touch-btn-font) * 0.9);
+        }
+
+        .touch-btn-brake:active, .touch-btn-brake.active-press {
+            background: #92400e;
+            border-color: #ffffff;
+            box-shadow: 0 0 16px rgba(245, 158, 11, 0.8);
+        }
+
+        /* ANIMAL CHEER / CRY BUTTON */
+        .touch-btn-cry {
+            width: calc(var(--touch-btn-size) * 0.72);
+            height: calc(var(--touch-btn-size) * 0.72);
+            background: radial-gradient(circle at 35% 30%, #a855f7, #7e22ce);
+            border: 2px solid #e9d5ff;
+            border-radius: 18px;
+        }
+
+        .touch-btn-cry .touch-icon {
+            font-size: calc(var(--touch-btn-font) * 0.75);
+        }
+
+        /* RESPONSIVE HUD ADAPTATIONS IN MOBILE / TOUCH MODE */
+        @media (pointer: coarse), (max-width: 900px) {
+            body:not(.mobile-mode-off) .hud-bottom-right {
+                bottom: calc(var(--touch-footer-h) + 12px) !important;
+                right: 14px !important;
+                transform-origin: bottom right;
+                transform: scale(0.92);
+            }
+
+            body:not(.mobile-mode-off) .hud-controls-hint {
+                display: none !important;
+            }
+
+            body:not(.mobile-mode-off) .side-radar-container {
+                top: 76px !important;
+                left: 10px !important;
+                height: 38vh !important;
+                width: 52px !important;
+                padding: 6px 4px !important;
+            }
+
+            body:not(.mobile-mode-off) .radar-avatar-node {
+                width: 24px !important;
+                height: 24px !important;
+                font-size: 13px !important;
+            }
+        }
+
+        body.mobile-mode-always .hud-bottom-right {
+            bottom: calc(var(--touch-footer-h) + 12px) !important;
+            right: 14px !important;
+            transform-origin: bottom right;
+            transform: scale(0.92);
+        }
+
+        body.mobile-mode-always .hud-controls-hint {
+            display: none !important;
+        }
+
+        body.mobile-mode-always .side-radar-container {
+            top: 76px !important;
+            left: 10px !important;
+            height: 38vh !important;
+            width: 52px !important;
+            padding: 6px 4px !important;
+        }
+
+        /* NARROW SMARTPHONE SCREENS (< 480px) */
+        @media (max-width: 480px) {
+            .mobile-footer-bar {
+                padding: 6px 8px max(10px, env(safe-area-inset-bottom, 10px)) 8px;
+            }
+            .touch-cluster.left-cluster {
+                gap: 8px;
+            }
+            .touch-main-row {
+                gap: 8px;
+            }
+            .touch-sub-row {
+                gap: 6px;
+            }
+            .touch-center-cluster {
+                transform: scale(0.88);
+            }
+            .top-bar {
+                top: 10px;
+                right: 10px;
+                gap: 6px;
+            }
+            .top-bar-btn {
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+        }
+
+        /* PAUSE MODAL */
+        #pauseModal {
+            display: none;
+            z-index: 90;
+        }
+
+        .pause-box {
+            background: var(--bg-card);
+            border: 3px solid var(--border-color);
+            border-radius: 24px;
+            padding: 28px 36px;
+            text-align: center;
+            box-shadow: var(--card-shadow);
+            max-width: 440px;
+            width: 90%;
+        }
+
+        .pause-title {
+            font-size: 32px;
+            font-weight: 900;
+            color: var(--accent);
+            margin-bottom: 20px;
+        }
+
+        .pause-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* PODIUM */
+        #podiumScreen {
+            display: none;
+        }
+
+        .podium-title {
+            font-size: 36px;
+            font-weight: 900;
+            color: var(--accent-gold);
+            margin-bottom: 18px;
+            text-align: center;
+        }
+
+        .podium-stage {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 14px;
+            margin-bottom: 20px;
+            height: 220px;
+        }
+
+        .podium-column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 140px;
+        }
+
+        .podium-column.first { order: 2; }
+        .podium-column.second { order: 1; }
+        .podium-column.third { order: 3; }
+
+        .podium-pedestal {
+            width: 100%;
+            border-radius: 16px 16px 0 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 32px;
+            font-weight: 900;
+            color: #ffffff;
+        }
+
+        .podium-column.first .podium-pedestal {
+            height: 120px;
+            background: linear-gradient(135deg, #f1c40f, #f39c12);
+        }
+
+        .podium-column.second .podium-pedestal {
+            height: 90px;
+            background: linear-gradient(135deg, #bdc3c7, #95a5a6);
+        }
+
+        .podium-column.third .podium-pedestal {
+            height: 65px;
+            background: linear-gradient(135deg, #e67e22, #d35400);
+        }
+
+        .podium-animal {
+            font-size: 52px;
+            animation: podiumHop 1.2s infinite ease-in-out;
+        }
+
+        @keyframes podiumHop {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+        }
+
+        .podium-name {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-top: 4px;
+        }
+
+        .leaderboard-table-container {
+            width: 100%;
+            max-width: 540px;
+            background: var(--bg-card);
+            border-radius: 16px;
+            border: 2px solid var(--border-color);
+            padding: 10px 16px;
+            margin-bottom: 18px;
+        }
+
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .leaderboard-table th {
+            text-align: left;
+            padding: 6px 4px;
+            color: var(--text-secondary);
+            font-size: 11px;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .leaderboard-table td {
+            padding: 6px 4px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .highlight-row {
+            background: rgba(255, 71, 87, 0.12);
+            font-weight: 800;
+        }
+
+        .badge-human {
+            background: var(--accent);
+            color: #ffffff;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 6px;
+        }
+
+        .badge-bot {
+            background: var(--accent-blue);
+            color: #ffffff;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 6px;
+        }
+
+        /* DEDICATED MOBILE SETTINGS CARD IN MENU */
+        .mobile-settings-card {
+            width: 100%;
+            max-width: 780px;
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            border-radius: 20px;
+            padding: 14px 18px;
+            margin-bottom: 14px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .mobile-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .mobile-card-title {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-badge-pill {
+            background: var(--accent-green);
+            color: #ffffff;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 10px;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-sm-settings {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            font-weight: 700;
+            font-size: 12px;
+            padding: 4px 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-sm-settings:hover {
+            border-color: var(--accent);
+            transform: translateY(-1px);
+        }
+
+        .mobile-options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 10px;
+        }
+
+        .mobile-opt-item {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 8px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .opt-label {
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+        }
+
+        .opt-btn-group {
+            display: flex;
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 2px;
+            gap: 2px;
+        }
+
+        .opt-btn {
+            flex: 1;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-family: var(--font-main);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 6px 4px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            white-space: nowrap;
+            transition: all 0.15s ease;
+        }
+
+        .opt-btn.active {
+            background: var(--accent);
+            color: #ffffff;
+            font-weight: 800;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+
+        .opt-btn.active-green {
+            background: var(--accent-green);
+            color: #ffffff;
+            font-weight: 800;
+        }
+
+        .opt-btn.active-blue {
+            background: var(--accent-blue);
+            color: #ffffff;
+            font-weight: 800;
+        }
+    </style>
+</head>
+<body class="theme-light">
+
+    <!-- TOP BAR CONTROLS -->
+    <div class="top-bar">
+        <button id="mobileOptionsBtn" class="top-bar-btn" title="Dedicated Mobile & Touch Controls Options">
+            📱 Mobile Options
+        </button>
+        <button id="themeToggleBtn" class="top-bar-btn" title="Toggle Light / Dark Mode">
+            ☀️ Light Mode
+        </button>
+        <button id="soundToggleBtn" class="top-bar-btn" title="Toggle Audio Sound & Music">
+            🔊 Sound ON
+        </button>
+        <button id="helpBtn" class="top-bar-btn" title="How to Play & Controls">
+            🎮 Controls
+        </button>
+    </div>
+
+    <!-- MAIN CONTAINER -->
+    <div id="gameContainer">
+        <!-- Game Canvas -->
+        <canvas id="gameCanvas"></canvas>
+
+        <!-- MAIN MENU OVERLAY -->
+        <div id="mainMenu" class="screen-overlay">
+            <div class="menu-title-box">
+                <span class="menu-title-badge">🐾 Competitive Baby Animal Derby</span>
+                <h1 class="menu-main-title">BABY ANIMAL DERBY</h1>
+                <p class="menu-subtitle">Balanced neck-and-neck speeds, speed meter display, side map distance radar, and straight highway lanes!</p>
+            </div>
+
+            <!-- RACE TIMER SELECTOR (2 / 5 / 10 / CUSTOM MINUTES) -->
+            <div class="timer-options-container">
+                <div class="timer-label">
+                    <span>⏱️ Race Duration Timer:</span>
+                </div>
+                <div class="timer-btn-group">
+                    <button class="timer-btn active" data-mins="2">2 Mins</button>
+                    <button class="timer-btn" data-mins="5">5 Mins</button>
+                    <button class="timer-btn" data-mins="10">10 Mins</button>
+                    <button class="timer-btn" id="customTimerBtn" data-mins="custom">Custom:</button>
+                    <input type="number" id="customMinutesInput" class="custom-timer-input" min="1" max="60" value="3" title="Custom minutes">
+                    <span style="font-size:12px; font-weight:700; margin-right:6px;">min</span>
+                </div>
+            </div>
+
+            <!-- DEDICATED SMARTPHONE & TOUCH OPTIONS CARD -->
+            <div class="mobile-settings-card">
+                <div class="mobile-card-header">
+                    <div class="mobile-card-title">
+                        <span>📱 Smartphone & Touch Controls</span>
+                        <span class="status-badge-pill" id="mobileStatusBadge">TOUCH READY</span>
+                    </div>
+                    <button class="btn-sm-settings" id="openMobileModalBtn">⚙️ More Mobile Settings</button>
+                </div>
+                <div class="mobile-options-grid">
+                    <div class="mobile-opt-item">
+                        <span class="opt-label">Footer Controls:</span>
+                        <div class="opt-btn-group" id="menuMobileModeGroup">
+                            <button class="opt-btn active" data-mode="auto">Auto</button>
+                            <button class="opt-btn" data-mode="always">Always ON</button>
+                            <button class="opt-btn" data-mode="off">OFF</button>
+                        </div>
+                    </div>
+                    <div class="mobile-opt-item">
+                        <span class="opt-label">Button Size:</span>
+                        <div class="opt-btn-group" id="menuMobileSizeGroup">
+                            <button class="opt-btn" data-size="normal">Normal</button>
+                            <button class="opt-btn active" data-size="large">Large</button>
+                            <button class="opt-btn" data-size="jumbo">Jumbo</button>
+                        </div>
+                    </div>
+                    <div class="mobile-opt-item">
+                        <span class="opt-label">Auto-Run (Cruise Trot):</span>
+                        <div class="opt-btn-group" id="menuMobileAutoRunGroup">
+                            <button class="opt-btn active" data-autorun="false">Hold to Run</button>
+                            <button class="opt-btn" data-autorun="true">⚡ Cruise ON</button>
+                        </div>
+                    </div>
+                    <div class="mobile-opt-item">
+                        <span class="opt-label">Haptic Vibration:</span>
+                        <div class="opt-btn-group" id="menuMobileHapticsGroup">
+                            <button class="opt-btn active" data-haptics="true">📳 Haptics ON</button>
+                            <button class="opt-btn" data-haptics="false">Mute</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5 STRAIGHT TRACKS CAROUSEL -->
+            <div class="track-selection-container">
+                <div class="section-label">Select Straight Racing Highway (5 Themed Maps)</div>
+                <div class="track-grid" id="trackGrid">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+
+            <!-- ACTION BUTTONS: START RACE, RESUME, NEW GAME, CUSTOMIZE -->
+            <div class="menu-actions">
+                <button id="startRaceBtn" class="btn-primary">
+                    <span>🐾 START RACE</span>
+                </button>
+                <button id="resumeRaceBtn" class="btn-secondary" style="display: none;">
+                    <span>▶️ RESUME RACE</span>
+                </button>
+                <button id="newGameBtn" class="btn-secondary">
+                    <span>🔄 NEW GAME</span>
+                </button>
+                <button id="customizeBtn" class="btn-secondary">
+                    <span>⚙️ RACERS & ANIMATIONS</span>
+                </button>
+                <button id="grandPrixBtn" class="btn-secondary">
+                    <span>🏆 5-TRACK GRAND PRIX</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 10-SECOND CONTROLS PREVIEW MODAL WITH SKIP BUTTON -->
+        <div id="controlsPromptModal">
+            <div class="controls-card">
+                <h2 class="controls-card-title">🎮 How to Play</h2>
+                <div class="controls-timer-pill" id="promptCountdownPill">Starting race in 10s...</div>
+                
+                <div class="controls-grid">
+                    <div class="ctrl-item">
+                        <div class="ctrl-key-badge">W / ▲ / 🐾</div>
+                        <div class="ctrl-desc">Run forward steadily (or use Auto-Run Cruise!)</div>
+                    </div>
+                    <div class="ctrl-item">
+                        <div class="ctrl-key-badge">A / D / ◀ ▶</div>
+                        <div class="ctrl-desc">Smooth left / right lane steering</div>
+                    </div>
+                    <div class="ctrl-item">
+                        <div class="ctrl-key-badge">SPACE / ⚡</div>
+                        <div class="ctrl-desc">Zoomie Dash (Tactical burst of speed!)</div>
+                    </div>
+                    <div class="ctrl-item">
+                        <div class="ctrl-key-badge">E / 🎁</div>
+                        <div class="ctrl-desc">Use mystery gift power-up item</div>
+                    </div>
+                    <div class="ctrl-item">
+                        <div class="ctrl-key-badge">H / 📢</div>
+                        <div class="ctrl-desc">Cute baby animal cry (Quack, Oink, Meow!)</div>
+                    </div>
+                    <div class="ctrl-item">
+                        <div class="ctrl-key-badge">ESC / ⏸️</div>
+                        <div class="ctrl-desc">Pause & mobile settings anytime</div>
+                    </div>
+                </div>
+
+                <button id="skipControlsBtn" class="btn-skip">
+                    <span>⏩ SKIP & START RACE (SPACE / TAP)</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- RACER & BOT CUSTOMIZATION SCREEN (WITH ANIMATION TYPES) -->
+        <div id="customizeScreen" class="screen-overlay" style="display: none;">
+            <div class="custom-roster-box">
+                <div class="roster-header">
+                    <div>
+                        <div class="roster-title">🐾 Racer Lineup & Animation Types</div>
+                        <div class="menu-subtitle">Edit names, choose Human or Bot, toggle On/Off, and customize running animations!</div>
+                    </div>
+                </div>
+
+                <!-- 8 RACER SLOTS GRID -->
+                <div class="roster-grid" id="rosterGrid">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+
+            <div class="menu-actions">
+                <button id="saveCustomizeBtn" class="btn-primary">
+                    <span>✅ SAVE & BACK TO MENU</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- IN-GAME HUD -->
+        <div id="gameHUD">
+            <!-- Position & Timer (Top Left) -->
+            <div class="hud-top-left">
+                <div class="hud-position-badge" id="hudPosition">
+                    <span class="rank-number">1</span><span class="rank-suffix">ST</span>
+                </div>
+                <div class="hud-timer-badge" id="hudTimerBadge">02:00</div>
+            </div>
+
+            <!-- Pause Button (Top Right HUD) -->
+            <button class="hud-pause-btn" id="hudPauseBtn" title="Pause Game (Esc / P)">
+                ⏸️
+            </button>
+
+            <!-- Item Roulette / Power-Up Slot (Top Center) -->
+            <div class="hud-item-slot" id="hudItemSlot">
+                <span id="hudItemIcon"></span>
+            </div>
+
+            <!-- SIDE DISTANCE RADAR / MAP (Shows distance between all racers) -->
+            <div class="side-radar-container">
+                <div class="side-radar-title">MAP</div>
+                <div class="side-radar-track" id="sideRadarTrack">
+                    <div class="radar-finish-flag">🏁</div>
+                    <!-- Avatars populated dynamically -->
+                </div>
+            </div>
+
+            <!-- SPEEDOMETER MINI-GAUGE DISPLAY & DISTANCE (Bottom Right) -->
+            <div class="hud-bottom-right">
+                <div class="speedometer-card">
+                    <canvas id="speedDialCanvas" width="70" height="50"></canvas>
+                    <div class="speed-text-box">
+                        <div class="speed-number" id="hudSpeedNumber">0.0</div>
+                        <div class="speed-unit">KM/H TROT</div>
+                    </div>
+                </div>
+                <div class="hud-distance" id="hudDistance">0 METERS</div>
+                <div class="hud-controls-hint">
+                    W/▲: Trot | A/D: Lane | Space: Zoomie Dash | E: Gift Item | H: Cry | Esc: Pause
+                </div>
+            </div>
+
+            <!-- DEDICATED BIG-BUTTON FOOTER CONTROLS FOR TOUCHSCREEN SMARTPHONES -->
+            <div class="mobile-footer-bar" id="mobileFooterBar">
+                <!-- LEFT THUMB: STEERING -->
+                <div class="touch-cluster left-cluster">
+                    <button class="touch-btn touch-btn-steer" id="touchLeft" aria-label="Steer Left">
+                        <span class="touch-icon">◀</span>
+                        <span class="touch-label">LEFT</span>
+                    </button>
+                    <button class="touch-btn touch-btn-steer" id="touchRight" aria-label="Steer Right">
+                        <span class="touch-icon">▶</span>
+                        <span class="touch-label">RIGHT</span>
+                    </button>
+                </div>
+
+                <!-- CENTER FOOTER: AUTO-RUN CRUISE TROT & QUICK PAUSE -->
+                <div class="touch-center-cluster">
+                    <button class="touch-pill-btn" id="touchAutoRunPill" title="Toggle Auto-Run Cruise">
+                        <span class="pill-dot"></span>
+                        <span id="touchAutoRunLabel">CRUISE: OFF</span>
+                    </button>
+                    <button class="touch-pill-btn" id="touchMobilePauseBtn" title="Pause Game">
+                        ⏸️ PAUSE
+                    </button>
+                </div>
+
+                <!-- RIGHT THUMB: TACTILE ACTIONS -->
+                <div class="touch-cluster right-cluster">
+                    <div class="touch-sub-row">
+                        <button class="touch-btn touch-btn-cry" id="touchHonk" title="Baby Animal Cheer/Cry">
+                            <span class="touch-icon">📢</span>
+                            <span class="touch-label">CRY</span>
+                        </button>
+                        <button class="touch-btn touch-btn-brake" id="touchBrake" title="Slow Down / Brake">
+                            <span class="touch-icon">🔻</span>
+                            <span class="touch-label">BRAKE</span>
+                        </button>
+                        <button class="touch-btn touch-btn-item" id="touchItem" title="Use Mystery Item">
+                            <span class="touch-icon">🎁</span>
+                            <span class="touch-label">ITEM</span>
+                        </button>
+                    </div>
+                    <div class="touch-main-row">
+                        <button class="touch-btn touch-btn-dash" id="touchDrift" title="Zoomie Dash Boost">
+                            <span class="touch-icon">⚡</span>
+                            <span class="touch-label">DASH</span>
+                        </button>
+                        <button class="touch-btn touch-btn-run" id="touchGas" title="Hold or Tap to Run">
+                            <span class="touch-icon">🐾</span>
+                            <span class="touch-label" id="touchRunLabel">RUN</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAUSE / IN-GAME MENU MODAL -->
+        <div id="pauseModal" class="screen-overlay">
+            <div class="pause-box">
+                <h2 class="pause-title">⏸️ RACE PAUSED</h2>
+                <div class="pause-actions">
+                    <button id="modalResumeBtn" class="btn-primary" style="justify-content: center;">
+                        ▶️ RESUME RACE
+                    </button>
+                    <button id="modalMobileBtn" class="btn-secondary" style="justify-content: center;">
+                        📱 MOBILE & TOUCH SETTINGS
+                    </button>
+                    <button id="modalRestartBtn" class="btn-secondary" style="justify-content: center;">
+                        🔄 RESTART RACE
+                    </button>
+                    <button id="modalNewGameBtn" class="btn-secondary" style="justify-content: center;">
+                        🏁 NEW GAME (MAIN MENU)
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PODIUM & CELEBRATION SCREEN -->
+        <div id="podiumScreen" class="screen-overlay">
+            <h2 class="podium-title">🏆 RACE COMPLETE! 🏆</h2>
+
+            <div class="podium-stage">
+                <div class="podium-column second">
+                    <div id="podiumSecond"></div>
+                    <div class="podium-pedestal">2</div>
+                </div>
+                <div class="podium-column first">
+                    <div id="podiumFirst"></div>
+                    <div class="podium-pedestal">1</div>
+                </div>
+                <div class="podium-column third">
+                    <div id="podiumThird"></div>
+                    <div class="podium-pedestal">3</div>
+                </div>
+            </div>
+
+            <div class="leaderboard-table-container">
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>Pos</th>
+                            <th>Baby Racer</th>
+                            <th>Distance Run</th>
+                            <th>Player</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboardBody"></tbody>
+                </table>
+            </div>
+
+            <div class="menu-actions">
+                <button id="podiumNextBtn" class="btn-primary">
+                    <span>🔁 RACE AGAIN</span>
+                </button>
+                <button id="podiumMenuBtn" class="btn-secondary">
+                    <span>🏠 MAIN MENU (NEW GAME)</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- HOW TO PLAY MODAL -->
+        <div id="helpModal" class="screen-overlay" style="display: none;">
+            <div class="custom-roster-box" style="max-width: 650px;">
+                <div class="roster-title" style="margin-bottom: 14px;">🎮 Game Controls & Features</div>
+                <div style="font-size: 14px; line-height: 1.6; color: var(--text-primary);">
+                    <p style="margin-bottom: 10px;">
+                        <strong>🛣️ Straight Highway with Balanced Speeds:</strong> All racers run at identical, balanced paces so anyone can win! Slipstreaming behind racers lets you draft and overtake!
+                    </p>
+                    <p style="margin-bottom: 10px;">
+                        <strong>📊 Speedometer Display:</strong> Watch your live running speed on the small dial gauge meter in the bottom-right corner!
+                    </p>
+                    <p style="margin-bottom: 10px;">
+                        <strong>🗺️ Side Radar Map:</strong> Check the vertical radar on the left side to see exactly how far ahead or behind other players are from you!
+                    </p>
+                    <p style="margin-bottom: 10px;">
+                        <strong>⏱️ Timer Options:</strong> 2, 5, 10, or custom minutes. When the timer hits 0:00, whoever ran the furthest wins!
+                    </p>
+                </div>
+                <div class="menu-actions" style="margin-top: 18px;">
+                    <button id="closeHelpBtn" class="btn-primary" style="padding: 10px 28px; font-size: 16px;">
+                        GOT IT, LET'S RACE!
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- DEDICATED MOBILE OPTIONS MODAL -->
+        <div id="mobileOptionsModal" class="screen-overlay" style="display: none;">
+            <div class="custom-roster-box" style="max-width: 620px;">
+                <div class="roster-header">
+                    <div>
+                        <div class="roster-title">📱 Dedicated Smartphone & Touch Options</div>
+                        <div class="menu-subtitle">Ergonomic large footer buttons, auto-run cruise trot, and tactile haptic vibration!</div>
+                    </div>
+                </div>
+
+                <div class="mobile-options-grid" style="grid-template-columns: 1fr; gap: 14px; margin-top: 10px;">
+                    <!-- Mobile Mode Toggle -->
+                    <div class="mobile-opt-item" style="padding: 12px 14px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                            <span class="opt-label">📱 Touch Controls Display Mode</span>
+                            <span class="status-badge-pill" id="modalActiveStatusBadge">AUTO</span>
+                        </div>
+                        <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">
+                            Choose whether big footer buttons are automatically detected on touch devices, forced always ON (useful for testing on PC), or turned OFF.
+                        </div>
+                        <div class="opt-btn-group" id="modalMobileModeGroup">
+                            <button class="opt-btn active" data-mode="auto">Auto-Detect</button>
+                            <button class="opt-btn" data-mode="always">Always ON (Force)</button>
+                            <button class="opt-btn" data-mode="off">OFF (Desktop Keyboard Only)</button>
+                        </div>
+                    </div>
+
+                    <!-- Button Size Picker -->
+                    <div class="mobile-opt-item" style="padding: 12px 14px;">
+                        <span class="opt-label">🔘 Footer Button Size</span>
+                        <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">
+                            Pick larger thumb targets for comfortable, accurate taps on small smartphones or tablets.
+                        </div>
+                        <div class="opt-btn-group" id="modalMobileSizeGroup">
+                            <button class="opt-btn" data-size="normal">Normal (68px)</button>
+                            <button class="opt-btn active" data-size="large">Large (80px - Default)</button>
+                            <button class="opt-btn" data-size="jumbo">Jumbo (92px - Extra Big)</button>
+                        </div>
+                    </div>
+
+                    <!-- Auto-Run Cruise Trot -->
+                    <div class="mobile-opt-item" style="padding: 12px 14px;">
+                        <span class="opt-label">🐾 Auto-Run (Cruise Trot)</span>
+                        <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">
+                            When enabled, your baby animal automatically trots forward at cruising pace so your thumb doesn't get tired holding the run button during long races! Tap 🐾 RUN to sprint, tap 🔻 BRAKE to slow.
+                        </div>
+                        <div class="opt-btn-group" id="modalMobileAutoRunGroup">
+                            <button class="opt-btn active" data-autorun="false">Manual Hold-to-Run</button>
+                            <button class="opt-btn" data-autorun="true">⚡ Cruise Trot ON (Fatigue-Free)</button>
+                        </div>
+                    </div>
+
+                    <!-- Haptic Feedback Vibration -->
+                    <div class="mobile-opt-item" style="padding: 12px 14px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                            <span class="opt-label">📳 Haptic Touch Vibration</span>
+                            <button id="testHapticBtn" class="btn-sm-settings" style="font-size: 11px;">Test Vibrate 📳</button>
+                        </div>
+                        <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">
+                            Subtle physical vibration pulse when tapping steering, run, dash, item, or brake buttons (supported smartphones/browsers).
+                        </div>
+                        <div class="opt-btn-group" id="modalMobileHapticsGroup">
+                            <button class="opt-btn active" data-haptics="true">📳 Vibration ON</button>
+                            <button class="opt-btn" data-haptics="false">Mute Vibration</button>
+                        </div>
+                    </div>
+
+                    <!-- Hand Layout & Opacity -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px;">
+                        <div class="mobile-opt-item">
+                            <span class="opt-label">🖐️ Hand Layout</span>
+                            <div class="opt-btn-group" id="modalMobileHandGroup">
+                                <button class="opt-btn active" data-swap="false">Right-Handed (Standard)</button>
+                                <button class="opt-btn" data-swap="true">Inverted (Left-Handed)</button>
+                            </div>
+                        </div>
+                        <div class="mobile-opt-item">
+                            <span class="opt-label">👁️ Footer Button Opacity</span>
+                            <div class="opt-btn-group" id="modalMobileOpacityGroup">
+                                <button class="opt-btn" data-opacity="0.5">50% Subtle</button>
+                                <button class="opt-btn" data-opacity="0.75">75% Glass</button>
+                                <button class="opt-btn active" data-opacity="0.9">90% Solid</button>
+                                <button class="opt-btn" data-opacity="1.0">100%</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="menu-actions" style="margin-top: 20px;">
+                    <button id="closeMobileModalBtn" class="btn-primary" style="width: 100%; justify-content: center; font-size: 16px;">
+                        ✅ SAVE & RETURN
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- FULL INTEGRATED JAVASCRIPT GAME CODE -->
+    <script>
+    /* =====================================================================
+       1. SMOOTH & GENTLE AUDIO SYNTHESIZER (NO HARSH NOISES)
+       ===================================================================== */
+    class SoundEngine {
+        constructor() {
+            this.ctx = null;
+            this.isMuted = false;
+            this.musicPlaying = false;
+            this.musicGain = null;
+            this.sfxGain = null;
+            this.masterGain = null;
+            this.currentTrackTheme = 0;
+            this.musicStep = 0;
+            this.musicTimer = null;
+            this.initialized = false;
+        }
+
+        init() {
+            if (this.initialized) return;
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                this.ctx = new AudioCtx();
+
+                this.masterGain = this.ctx.createGain();
+                this.masterGain.gain.value = 0.75;
+                this.masterGain.connect(this.ctx.destination);
+
+                this.sfxGain = this.ctx.createGain();
+                this.sfxGain.gain.value = 0.55;
+                this.sfxGain.connect(this.masterGain);
+
+                this.musicGain = this.ctx.createGain();
+                this.musicGain.gain.value = 0.22;
+                this.musicGain.connect(this.masterGain);
+
+                this.initialized = true;
+            } catch (e) {
+                console.warn("Web Audio not available", e);
+            }
+        }
+
+        resume() {
+            if (!this.initialized) this.init();
+            if (this.ctx && this.ctx.state === 'suspended') {
+                this.ctx.resume();
+            }
+        }
+
+        toggleMute() {
+            this.isMuted = !this.isMuted;
+            if (this.masterGain) {
+                this.masterGain.gain.value = this.isMuted ? 0 : 0.75;
+            }
+            return this.isMuted;
+        }
+
+        playPatter() {
+            if (!this.initialized || this.isMuted) return;
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(260 + Math.random() * 30, now);
+            osc.frequency.exponentialRampToValueAtTime(140, now + 0.08);
+
+            gain.gain.setValueAtTime(0.06, now);
+            gain.gain.exponentialRampToValueAtTime(0.002, now + 0.08);
+
+            osc.connect(gain);
+            gain.connect(this.sfxGain);
+            osc.start(now);
+            osc.stop(now + 0.08);
+        }
+
+        playHop() {
+            if (!this.initialized || this.isMuted) return;
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(340, now);
+            osc.frequency.exponentialRampToValueAtTime(560, now + 0.12);
+
+            gain.gain.setValueAtTime(0.25, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+
+            osc.connect(gain);
+            gain.connect(this.sfxGain);
+            osc.start(now);
+            osc.stop(now + 0.12);
+        }
+
+        playBoost() {
+            if (!this.initialized || this.isMuted) return;
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(320, now);
+            osc.frequency.exponentialRampToValueAtTime(680, now + 0.3);
+
+            gain.gain.setValueAtTime(0.28, now);
+            gain.gain.exponentialRampToValueAtTime(0.005, now + 0.32);
+
+            osc.connect(gain);
+            gain.connect(this.sfxGain);
+            osc.start(now);
+            osc.stop(now + 0.32);
+        }
+
+        playSoftBump() {
+            if (!this.initialized || this.isMuted) return;
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(150, now);
+            osc.frequency.exponentialRampToValueAtTime(80, now + 0.12);
+
+            gain.gain.setValueAtTime(0.25, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+
+            osc.connect(gain);
+            gain.connect(this.sfxGain);
+            osc.start(now);
+            osc.stop(now + 0.12);
+        }
+
+        playItemBox() {
+            if (!this.initialized || this.isMuted) return;
+            const notes = [523.25, 659.25, 783.99, 1046.50];
+            notes.forEach((freq, idx) => {
+                const now = this.ctx.currentTime + idx * 0.05;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, now);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.005, now + 0.12);
+                osc.connect(gain);
+                gain.connect(this.sfxGain);
+                osc.start(now);
+                osc.stop(now + 0.12);
+            });
+        }
+
+        playItemReady() {
+            if (!this.initialized || this.isMuted) return;
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(784, now);
+            osc.frequency.setValueAtTime(1046.5, now + 0.08);
+            gain.gain.setValueAtTime(0.25, now);
+            gain.gain.exponentialRampToValueAtTime(0.005, now + 0.2);
+            osc.connect(gain);
+            gain.connect(this.sfxGain);
+            osc.start(now);
+            osc.stop(now + 0.2);
+        }
+
+        playSlip() {
+            if (!this.initialized || this.isMuted) return;
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(440, now);
+            osc.frequency.linearRampToValueAtTime(260, now + 0.18);
+            gain.gain.setValueAtTime(0.22, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
+            osc.connect(gain);
+            gain.connect(this.sfxGain);
+            osc.start(now);
+            osc.stop(now + 0.22);
+        }
+
+        playBubble() {
+            if (!this.initialized || this.isMuted) return;
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(420, now);
+            osc.frequency.exponentialRampToValueAtTime(840, now + 0.1);
+            gain.gain.setValueAtTime(0.25, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+            osc.connect(gain);
+            gain.connect(this.sfxGain);
+            osc.start(now);
+            osc.stop(now + 0.1);
+        }
+
+        playCountdown(count) {
+            if (!this.initialized || this.isMuted) return;
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            if (count > 0) {
+                osc.frequency.setValueAtTime(440, now);
+                gain.gain.setValueAtTime(0.25, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+            } else {
+                osc.frequency.setValueAtTime(880, now);
+                gain.gain.setValueAtTime(0.4, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
+            }
+            osc.connect(gain);
+            gain.connect(this.sfxGain);
+            osc.start(now);
+            osc.stop(now + (count > 0 ? 0.2 : 0.45));
+        }
+
+        playVictory() {
+            if (!this.initialized || this.isMuted) return;
+            const melody = [523, 659, 784, 1046, 784, 1046];
+            const times = [0, 0.12, 0.24, 0.36, 0.52, 0.68];
+            melody.forEach((freq, i) => {
+                const now = this.ctx.currentTime + times[i];
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, now);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                osc.connect(gain);
+                gain.connect(this.sfxGain);
+                osc.start(now);
+                osc.stop(now + 0.2);
+            });
+        }
+
+        playAnimalCry(animalType) {
+            if (!this.initialized || this.isMuted) return;
+            const now = this.ctx.currentTime;
+            switch (animalType) {
+                case 'duck': {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(360, now);
+                    osc.frequency.exponentialRampToValueAtTime(240, now + 0.18);
+                    gain.gain.setValueAtTime(0.35, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                    osc.connect(gain);
+                    gain.connect(this.sfxGain);
+                    osc.start(now);
+                    osc.stop(now + 0.2);
+                    break;
+                }
+                case 'chicken': {
+                    [0, 0.08, 0.18].forEach((t, i) => {
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc.type = 'sine';
+                        const freq = i === 2 ? 720 : 580;
+                        osc.frequency.setValueAtTime(freq, now + t);
+                        gain.gain.setValueAtTime(0.22, now + t);
+                        gain.gain.exponentialRampToValueAtTime(0.01, now + t + 0.07);
+                        osc.connect(gain);
+                        gain.connect(this.sfxGain);
+                        osc.start(now + t);
+                        osc.stop(now + t + 0.07);
+                    });
+                    break;
+                }
+                case 'panda': {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(200, now);
+                    osc.frequency.exponentialRampToValueAtTime(130, now + 0.16);
+                    gain.gain.setValueAtTime(0.4, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.16);
+                    osc.connect(gain);
+                    gain.connect(this.sfxGain);
+                    osc.start(now);
+                    osc.stop(now + 0.16);
+                    break;
+                }
+                case 'rabbit': {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(800, now);
+                    osc.frequency.linearRampToValueAtTime(1100, now + 0.07);
+                    gain.gain.setValueAtTime(0.25, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.14);
+                    osc.connect(gain);
+                    gain.connect(this.sfxGain);
+                    osc.start(now);
+                    osc.stop(now + 0.14);
+                    break;
+                }
+                case 'piglet': {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(400, now);
+                    osc.frequency.linearRampToValueAtTime(600, now + 0.08);
+                    gain.gain.setValueAtTime(0.28, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
+                    osc.connect(gain);
+                    gain.connect(this.sfxGain);
+                    osc.start(now);
+                    osc.stop(now + 0.18);
+                    break;
+                }
+                case 'kitten': {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(550, now);
+                    osc.frequency.linearRampToValueAtTime(750, now + 0.1);
+                    osc.frequency.linearRampToValueAtTime(480, now + 0.22);
+                    gain.gain.setValueAtTime(0.28, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.24);
+                    osc.connect(gain);
+                    gain.connect(this.sfxGain);
+                    osc.start(now);
+                    osc.stop(now + 0.24);
+                    break;
+                }
+                default:
+                    this.playHop();
+            }
+        }
+
+        startMusic(trackIndex = 0) {
+            if (!this.initialized) this.init();
+            this.stopMusic();
+            this.currentTrackTheme = trackIndex;
+            this.musicPlaying = true;
+            this.musicStep = 0;
+
+            const trackThemes = [
+                { bpm: 108, notes: [523, 659, 784, 880, 784, 659, 587, 523] },
+                { bpm: 112, notes: [698, 880, 1046, 880, 784, 698, 880, 1046] },
+                { bpm: 110, notes: [784, 880, 987, 784, 880, 987, 1174, 987] },
+                { bpm: 106, notes: [880, 1108, 1318, 1108, 880, 740, 880, 1108] },
+                { bpm: 114, notes: [587, 698, 880, 698, 587, 880, 1046, 880] }
+            ];
+
+            const theme = trackThemes[trackIndex % trackThemes.length];
+            const stepTime = (60 / theme.bpm) / 2;
+
+            const scheduleMusic = () => {
+                if (!this.musicPlaying || !this.ctx || this.isMuted) {
+                    if (this.musicPlaying) this.musicTimer = setTimeout(scheduleMusic, stepTime * 1000);
+                    return;
+                }
+
+                const now = this.ctx.currentTime;
+                const step = this.musicStep % 8;
+                const note = theme.notes[step];
+
+                if (note) {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(note, now);
+
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.exponentialRampToValueAtTime(0.002, now + stepTime * 1.6);
+
+                    osc.connect(gain);
+                    gain.connect(this.musicGain);
+                    osc.start(now);
+                    osc.stop(now + stepTime * 1.6);
+                }
+
+                this.musicStep++;
+                this.musicTimer = setTimeout(scheduleMusic, stepTime * 1000);
+            };
+
+            scheduleMusic();
+        }
+
+        stopMusic() {
+            this.musicPlaying = false;
+            if (this.musicTimer) {
+                clearTimeout(this.musicTimer);
+                this.musicTimer = null;
+            }
+        }
+    }
+    window.soundEngine = new SoundEngine();
+
+    /* =====================================================================
+       2. BABY ANIMALS (BALANCED IDENTICAL COMPETITIVE SPEED)
+       ===================================================================== */
+    const ANIMATION_TYPES = [
+        { id: 'waddle', name: 'Cute Waddle', desc: 'Bubbly side-to-side waddle and bob' },
+        { id: 'tippytap', name: 'Tippy-Tap Scamper', desc: 'Fast, playful little pitter-patter feet' },
+        { id: 'bouncy', name: 'Bouncy Trot', desc: 'Springy, cheerful high hops' },
+        { id: 'zoomies', name: 'Toddler Zoomies', desc: 'Playful energetic strides with ear bounces' }
+    ];
+
+    // All animals have IDENTICAL baseline top speed (3.6) so no one loses easily!
+    const ANIMAL_PROFILES = {
+        panda: {
+            id: 'panda', name: 'Po Po', title: 'Chubby Panda', avatar: '🐼',
+            defaultAnim: 'waddle', bodyColor: '#ffffff', accentColor: '#222f3e',
+            stats: { speed: 3.6, accel: 0.14, steer: 0.054, weight: 1.2 }, sound: 'panda'
+        },
+        rabbit: {
+            id: 'rabbit', name: 'Barnaby', title: 'Hopping Bunny', avatar: '🐰',
+            defaultAnim: 'bouncy', bodyColor: '#ffffff', accentColor: '#ffb8b8',
+            stats: { speed: 3.6, accel: 0.14, steer: 0.054, weight: 0.9 }, sound: 'rabbit'
+        },
+        tortoise: {
+            id: 'tortoise', name: 'Shelldon', title: 'Steady Tortoise', avatar: '🐢',
+            defaultAnim: 'tippytap', bodyColor: '#2ed573', accentColor: '#10ac84',
+            stats: { speed: 3.6, accel: 0.14, steer: 0.054, weight: 1.1 }, sound: 'tortoise'
+        },
+        chicken: {
+            id: 'chicken', name: 'Nugget', title: 'Little Chick', avatar: '🐥',
+            defaultAnim: 'tippytap', bodyColor: '#feca57', accentColor: '#ee5253',
+            stats: { speed: 3.6, accel: 0.14, steer: 0.054, weight: 0.8 }, sound: 'chicken'
+        },
+        duck: {
+            id: 'duck', name: 'Admiral Ducky', title: 'Baby Duckling', avatar: '🦆',
+            defaultAnim: 'waddle', bodyColor: '#feca57', accentColor: '#ff9f43',
+            stats: { speed: 3.6, accel: 0.14, steer: 0.054, weight: 0.95 }, sound: 'duck'
+        },
+        piglet: {
+            id: 'piglet', name: 'Truffles', title: 'Happy Piglet', avatar: '🐷',
+            defaultAnim: 'zoomies', bodyColor: '#ffb8b8', accentColor: '#ff7979',
+            stats: { speed: 3.6, accel: 0.14, steer: 0.054, weight: 1.1 }, sound: 'piglet'
+        },
+        kitten: {
+            id: 'kitten', name: 'Mochi', title: 'Playful Kitty', avatar: '🐱',
+            defaultAnim: 'zoomies', bodyColor: '#f1f2f6', accentColor: '#a55eea',
+            stats: { speed: 3.6, accel: 0.14, steer: 0.054, weight: 0.9 }, sound: 'kitten'
+        },
+        hamster: {
+            id: 'hamster', name: 'Pip', title: 'Chubby Hammy', avatar: '🐹',
+            defaultAnim: 'bouncy', bodyColor: '#f39c12', accentColor: '#ffffff',
+            stats: { speed: 3.6, accel: 0.14, steer: 0.054, weight: 0.85 }, sound: 'hamster'
+        }
+    };
+
+    class AnimalRenderer {
+        static drawRacer(ctx, racer, isDarkMode = false) {
+            ctx.save();
+            ctx.translate(racer.x, racer.y);
+
+            const animType = racer.animType || 'waddle';
+            const phase = racer.legPhase || 0;
+            const isMoving = racer.speed > 0.1;
+
+            // Ground shadow
+            ctx.save();
+            ctx.scale(1, 0.45);
+            ctx.fillStyle = isDarkMode ? 'rgba(0, 0, 0, 0.55)' : 'rgba(0, 0, 0, 0.22)';
+            ctx.beginPath();
+            ctx.arc(0, 16, 20, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+
+            // Heading angle
+            ctx.rotate(racer.angle);
+
+            if (racer.wobbleTimer > 0) {
+                ctx.rotate(Math.sin(racer.wobbleTimer * 20) * 0.25);
+            }
+
+            const profile = ANIMAL_PROFILES[racer.animalId] || ANIMAL_PROFILES.panda;
+
+            this.drawRunningLegs(ctx, racer, profile, animType, phase, isMoving);
+            this.drawAnimalBody(ctx, racer, profile, animType, phase, isMoving);
+            this.drawFace(ctx);
+
+            if (racer.isBoosted) this.drawDashSparkles(ctx);
+            if (racer.hasShield) this.drawBubbleShield(ctx);
+
+            ctx.restore();
+            this.drawOverheadTag(ctx, racer, isDarkMode);
+        }
+
+        static drawRunningLegs(ctx, racer, profile, animType, phase, isMoving) {
+            let legSwing = isMoving ? Math.sin(phase) * 10 : 0;
+            if (animType === 'tippytap') legSwing = isMoving ? Math.sin(phase * 1.6) * 7 : 0;
+            if (animType === 'bouncy') legSwing = isMoving ? Math.sin(phase) * 12 : 0;
+            if (animType === 'zoomies') legSwing = isMoving ? Math.sin(phase * 1.3) * 11 : 0;
+
+            const legColor = (profile.id === 'duck' || profile.id === 'chicken') ? '#ff9f43' : (profile.id === 'panda' ? '#222f3e' : profile.accentColor);
+
+            ctx.save();
+            ctx.fillStyle = legColor;
+
+            if (profile.id === 'duck') {
+                ctx.beginPath();
+                ctx.ellipse(-10, 14 + legSwing, 6, 4, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.ellipse(10, 14 - legSwing, 6, 4, 0, 0, Math.PI * 2);
+                ctx.fill();
+            } else if (profile.id === 'chicken') {
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = '#ff9f43';
+                ctx.beginPath();
+                ctx.moveTo(-8, 8); ctx.lineTo(-8, 16 + legSwing);
+                ctx.moveTo(8, 8); ctx.lineTo(8, 16 - legSwing);
+                ctx.stroke();
+            } else {
+                ctx.beginPath();
+                ctx.arc(-14, -8 + legSwing, 4.5, 0, Math.PI * 2);
+                ctx.arc(14, -8 - legSwing, 4.5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(-15, 12 - legSwing, 5, 0, Math.PI * 2);
+                ctx.arc(15, 12 + legSwing, 5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.restore();
+        }
+
+        static drawAnimalBody(ctx, racer, profile, animType, phase, isMoving) {
+            ctx.save();
+
+            let bobY = 0;
+            let bodyRock = 0;
+            if (isMoving) {
+                if (animType === 'waddle') {
+                    bodyRock = Math.sin(phase * 0.5) * 0.12;
+                    bobY = Math.abs(Math.sin(phase)) * 3;
+                } else if (animType === 'bouncy') {
+                    bobY = Math.abs(Math.sin(phase)) * 6;
+                } else if (animType === 'tippytap') {
+                    bobY = Math.abs(Math.sin(phase * 1.5)) * 2;
+                } else if (animType === 'zoomies') {
+                    bobY = Math.abs(Math.sin(phase * 1.2)) * 4;
+                    bodyRock = Math.sin(phase) * 0.06;
+                }
+            }
+
+            ctx.translate(0, -bobY);
+            ctx.rotate(bodyRock);
+
+            switch (profile.id) {
+                case 'panda':
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath(); ctx.ellipse(0, 2, 18, 16, 0, 0, Math.PI * 2); ctx.fill();
+                    ctx.fillStyle = '#222f3e';
+                    ctx.beginPath(); ctx.ellipse(0, -2, 18, 8, 0, 0, Math.PI * 2); ctx.fill();
+                    ctx.beginPath(); ctx.arc(-12, -16, 6, 0, Math.PI * 2); ctx.arc(12, -16, 6, 0, Math.PI * 2); ctx.fill();
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath(); ctx.arc(0, -8, 15, 0, Math.PI * 2); ctx.fill();
+                    ctx.fillStyle = '#222f3e';
+                    ctx.beginPath(); ctx.ellipse(-6, -9, 4.5, 3.5, 0.2, 0, Math.PI * 2);
+                    ctx.ellipse(6, -9, 4.5, 3.5, -0.2, 0, Math.PI * 2); ctx.fill();
+                    break;
+
+                case 'rabbit':
+                    const earBounce = isMoving ? Math.sin(phase) * 5 : 0;
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath(); ctx.ellipse(-7, -24 + earBounce * 0.25, 5, 13, -0.1, 0, Math.PI * 2);
+                    ctx.ellipse(7, -24 - earBounce * 0.25, 5, 13, 0.1, 0, Math.PI * 2); ctx.fill();
+                    ctx.fillStyle = '#ffb8b8';
+                    ctx.beginPath(); ctx.ellipse(-7, -24 + earBounce * 0.25, 2.8, 9, -0.1, 0, Math.PI * 2);
+                    ctx.ellipse(7, -24 - earBounce * 0.25, 2.8, 9, 0.1, 0, Math.PI * 2); ctx.fill();
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath(); ctx.ellipse(0, 4, 16, 14, 0, 0, Math.PI * 2); ctx.fill();
+                    ctx.beginPath(); ctx.arc(0, 18, 5, 0, Math.PI * 2); ctx.fill();
+                    ctx.beginPath(); ctx.arc(0, -8, 14, 0, Math.PI * 2); ctx.fill();
+                    break;
+
+                case 'tortoise':
+                    ctx.fillStyle = '#10ac84';
+                    ctx.beginPath(); ctx.ellipse(0, 4, 18, 16, 0, 0, Math.PI * 2); ctx.fill();
+                    ctx.strokeStyle = '#1dd1a1'; ctx.lineWidth = 2.5; ctx.stroke();
+                    ctx.fillStyle = '#1dd1a1'; ctx.beginPath(); ctx.arc(0, 4, 8, 0, Math.PI * 2); ctx.fill();
+                    ctx.fillStyle = '#2ed573'; ctx.beginPath(); ctx.arc(0, -12, 11, 0, Math.PI * 2); ctx.fill();
+                    break;
+
+                case 'chicken':
+                    ctx.fillStyle = '#feca57';
+                    ctx.beginPath(); ctx.arc(0, 0, 17, 0, Math.PI * 2); ctx.fill();
+                    ctx.fillStyle = '#ee5253';
+                    ctx.beginPath(); ctx.arc(0, -18, 4, 0, Math.PI * 2); ctx.fill();
+                    const wingFlap = isMoving ? Math.sin(phase * 1.5) * 6 : 0;
+                    ctx.fillStyle = '#ff9f43';
+                    ctx.beginPath(); ctx.ellipse(-16, 0, 4, 7 + wingFlap * 0.2, -0.3, 0, Math.PI * 2);
+                    ctx.ellipse(16, 0, 4, 7 - wingFlap * 0.2, 0.3, 0, Math.PI * 2); ctx.fill();
+                    ctx.fillStyle = '#ff6b6b';
+                    ctx.beginPath(); ctx.moveTo(0, -5); ctx.lineTo(-4, -10); ctx.lineTo(4, -10); ctx.closePath(); ctx.fill();
+                    break;
+
+                case 'duck':
+                    ctx.fillStyle = '#feca57';
+                    ctx.beginPath(); ctx.ellipse(0, 3, 17, 15, 0, 0, Math.PI * 2); ctx.fill();
+                    ctx.beginPath(); ctx.arc(0, -8, 14, 0, Math.PI * 2); ctx.fill();
+                    ctx.fillStyle = '#ff9f43';
+                    ctx.beginPath(); ctx.ellipse(0, -6, 8, 4.5, 0, 0, Math.PI * 2); ctx.fill();
+                    break;
+
+                case 'piglet':
+                    ctx.fillStyle = '#ffb8b8';
+                    ctx.beginPath(); ctx.ellipse(0, 4, 17, 15, 0, 0, Math.PI * 2); ctx.fill();
+                    ctx.fillStyle = '#ff7979';
+                    ctx.beginPath(); ctx.ellipse(-11, -14, 4.5, 7, -0.3, 0, Math.PI * 2);
+                    ctx.ellipse(11, -14, 4.5, 7, 0.3, 0, Math.PI * 2); ctx.fill();
+                    ctx.fillStyle = '#ffb8b8';
+                    ctx.beginPath(); ctx.arc(0, -8, 14, 0, Math.PI * 2); ctx.fill();
+                    ctx.fillStyle = '#ff7979';
+                    ctx.beginPath(); ctx.ellipse(0, -6, 6.5, 4.5, 0, 0, Math.PI * 2); ctx.fill();
+                    break;
+
+                case 'kitten':
+                    ctx.fillStyle = '#f1f2f6';
+                    ctx.beginPath(); ctx.ellipse(0, 4, 16, 14, 0, 0, Math.PI * 2); ctx.fill();
+                    ctx.fillStyle = '#a55eea';
+                    ctx.beginPath(); ctx.moveTo(-11, -10); ctx.lineTo(-14, -20); ctx.lineTo(-5, -15); ctx.closePath(); ctx.fill();
+                    ctx.beginPath(); ctx.moveTo(11, -10); ctx.lineTo(14, -20); ctx.lineTo(5, -15); ctx.closePath(); ctx.fill();
+                    ctx.fillStyle = '#f1f2f6';
+                    ctx.beginPath(); ctx.arc(0, -8, 14, 0, Math.PI * 2); ctx.fill();
+                    break;
+
+                case 'hamster':
+                    ctx.fillStyle = '#f39c12';
+                    ctx.beginPath(); ctx.ellipse(0, 3, 17, 15, 0, 0, Math.PI * 2); ctx.fill();
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath(); ctx.arc(-7, -6, 6, 0, Math.PI * 2);
+                    ctx.arc(7, -6, 6, 0, Math.PI * 2); ctx.fill();
+                    ctx.fillStyle = '#f39c12';
+                    ctx.beginPath(); ctx.arc(0, -8, 13, 0, Math.PI * 2); ctx.fill();
+                    break;
+            }
+            ctx.restore();
+        }
+
+        static drawFace(ctx) {
+            ctx.save();
+            ctx.translate(0, -8);
+            ctx.fillStyle = '#2f3542';
+            ctx.beginPath(); ctx.arc(-5, -3, 2.5, 0, Math.PI * 2); ctx.arc(5, -3, 2.5, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath(); ctx.arc(-6, -4, 1, 0, Math.PI * 2); ctx.arc(4, -4, 1, 0, Math.PI * 2); ctx.fill();
+            ctx.strokeStyle = '#2f3542'; ctx.lineWidth = 1.4;
+            ctx.beginPath(); ctx.arc(0, 1, 2.2, 0.1 * Math.PI, 0.9 * Math.PI); ctx.stroke();
+            ctx.restore();
+        }
+
+        static drawDashSparkles(ctx) {
+            ctx.fillStyle = '#ffa502';
+            for (let i = 0; i < 4; i++) {
+                const sx = (Math.random() - 0.5) * 20;
+                const sy = 16 + Math.random() * 8;
+                ctx.beginPath(); ctx.arc(sx, sy, 2 + Math.random() * 3, 0, Math.PI * 2); ctx.fill();
+            }
+        }
+
+        static drawBubbleShield(ctx) {
+            ctx.save();
+            ctx.strokeStyle = 'rgba(72, 219, 251, 0.8)';
+            ctx.fillStyle = 'rgba(72, 219, 251, 0.2)';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath(); ctx.arc(0, 0, 28, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            ctx.restore();
+        }
+
+        static drawOverheadTag(ctx, racer, isDarkMode) {
+            ctx.save();
+            ctx.translate(racer.x, racer.y - 34);
+            const nameText = racer.name || 'Racer';
+            ctx.font = 'bold 11px "Fredoka", sans-serif';
+            const textW = ctx.measureText(nameText).width;
+            const pillW = Math.max(textW + 18, 48);
+
+            ctx.fillStyle = racer.isHuman ? '#ff4757' : (isDarkMode ? '#2f3542' : '#747d8c');
+            ctx.beginPath();
+            ctx.roundRect(-pillW / 2, -10, pillW, 16, 8);
+            ctx.fill();
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(nameText, 0, -2);
+            ctx.restore();
+        }
+    }
+
+    /* =====================================================================
+       3. 5 THEMED STRAIGHT HIGHWAYS WITH 8 LANES & SCENERY
+       ===================================================================== */
+    class TrackManager {
+        static getTracks() {
+            return [
+                {
+                    id: 'farm', name: 'Sunny Meadow Straight', subtitle: 'Green pastures, flower beds & wooden fences',
+                    icon: '🚜', roadWidth: 420, numLanes: 8, musicId: 0,
+                    lightColors: { ground: '#a8e6cf', road: '#d7c49e', border: '#c4aa78', laneLine: 'rgba(255,255,255,0.7)', scenery: '#2ecc71' },
+                    darkColors: { ground: '#162b1e', road: '#3d3023', border: '#2b2118', laneLine: 'rgba(255,255,255,0.3)', scenery: '#27ae60' }
+                },
+                {
+                    id: 'candyland', name: 'Sugar Cookie Boulevard', subtitle: 'Marshmallow curbs, giant lollipops & gummies',
+                    icon: '🍭', roadWidth: 420, numLanes: 8, musicId: 1,
+                    lightColors: { ground: '#ffd3b6', road: '#ffffff', border: '#ffaaa5', laneLine: '#ff8b94', scenery: '#ff6b81' },
+                    darkColors: { ground: '#2e1223', road: '#4d193a', border: '#ff8b94', laneLine: 'rgba(255,107,129,0.5)', scenery: '#e84393' }
+                },
+                {
+                    id: 'bedroom', name: 'Playroom Grand Avenue', subtitle: 'Smooth parquet floor, giant building bricks & toys',
+                    icon: '🧸', roadWidth: 420, numLanes: 8, musicId: 2,
+                    lightColors: { ground: '#f9e79f', road: '#fdfefe', border: '#85c1e9', laneLine: '#f1948a', scenery: '#3498db' },
+                    darkColors: { ground: '#1c2833', road: '#283747', border: '#5499c7', laneLine: 'rgba(255,255,255,0.3)', scenery: '#2980b9' }
+                },
+                {
+                    id: 'lagoon', name: 'Tropical Boardwalk Strip', subtitle: 'Golden sand, ocean spray & palm trees',
+                    icon: '🏝️', roadWidth: 420, numLanes: 8, musicId: 3,
+                    lightColors: { ground: '#76d7c4', road: '#fdebd0', border: '#f8c471', laneLine: '#48c9b0', scenery: '#1abc9c' },
+                    darkColors: { ground: '#0b2e28', road: '#17423c', border: '#326b62', laneLine: 'rgba(72,201,176,0.5)', scenery: '#16a085' }
+                },
+                {
+                    id: 'space', name: 'Stardust Cosmic Runway', subtitle: 'Glowing neon starfield with energy fences',
+                    icon: '🚀', roadWidth: 420, numLanes: 8, musicId: 4,
+                    lightColors: { ground: '#d5d8dc', road: '#2c3e50', border: '#1abc9c', laneLine: '#f39c12', scenery: '#9b59b6' },
+                    darkColors: { ground: '#08090c', road: '#161d26', border: '#45a29e', laneLine: '#66fcf1', scenery: '#8e44ad' }
+                }
+            ];
+        }
+
+        static drawStraightTrack(ctx, track, camY, screenH, isDarkMode) {
+            const colors = isDarkMode ? track.darkColors : track.lightColors;
+            const roadW = track.roadWidth;
+            const halfW = roadW / 2;
+
+            ctx.fillStyle = colors.road;
+            ctx.fillRect(-halfW, camY - screenH, roadW, screenH * 2.5);
+
+            ctx.fillStyle = colors.border;
+            ctx.fillRect(-halfW - 20, camY - screenH, 20, screenH * 2.5);
+            ctx.fillRect(halfW, camY - screenH, 20, screenH * 2.5);
+
+            ctx.fillStyle = isDarkMode ? '#ff4757' : '#ffffff';
+            const stripeStep = 60;
+            const startStripe = Math.floor((camY - screenH) / stripeStep) * stripeStep;
+            for (let y = startStripe; y < camY + screenH * 1.5; y += stripeStep) {
+                ctx.fillRect(-halfW - 20, y, 20, stripeStep * 0.5);
+                ctx.fillRect(halfW, y, 20, stripeStep * 0.5);
+            }
+
+            ctx.strokeStyle = colors.laneLine;
+            ctx.lineWidth = 3;
+            ctx.setLineDash([20, 24]);
+            const laneW = roadW / track.numLanes;
+            for (let i = 1; i < track.numLanes; i++) {
+                const lx = -halfW + i * laneW;
+                ctx.beginPath();
+                ctx.moveTo(lx, camY - screenH);
+                ctx.lineTo(lx, camY + screenH * 1.5);
+                ctx.stroke();
+            }
+            ctx.setLineDash([]);
+
+            const sceneryStep = 180;
+            const startScenery = Math.floor((camY - screenH) / sceneryStep) * sceneryStep;
+            for (let y = startScenery; y < camY + screenH * 1.5; y += sceneryStep) {
+                this.drawSideItem(ctx, -halfW - 65, y, track.theme, colors.scenery);
+                this.drawSideItem(ctx, halfW + 65, y + 90, track.theme, colors.scenery);
+            }
+        }
+
+        static drawSideItem(ctx, x, y, theme, color) {
+            ctx.save();
+            ctx.translate(x, y);
+
+            if (theme === 'farm') {
+                ctx.fillStyle = '#2ecc71';
+                ctx.beginPath(); ctx.arc(0, 0, 22, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = '#27ae60';
+                ctx.beginPath(); ctx.arc(-6, -4, 14, 0, Math.PI * 2); ctx.fill();
+            } else if (theme === 'candyland') {
+                ctx.fillStyle = '#ffffff'; ctx.fillRect(-3, 0, 6, 26);
+                ctx.fillStyle = '#ff4757'; ctx.beginPath(); ctx.arc(0, -6, 18, 0, Math.PI * 2); ctx.fill();
+            } else if (theme === 'bedroom') {
+                ctx.fillStyle = color || '#e74c3c';
+                ctx.beginPath(); ctx.roundRect(-18, -14, 36, 28, 6); ctx.fill();
+            } else if (theme === 'lagoon') {
+                ctx.fillStyle = '#27ae60';
+                ctx.beginPath(); ctx.arc(0, -6, 24, 0, Math.PI * 2); ctx.fill();
+            } else {
+                ctx.fillStyle = '#f39c12';
+                ctx.beginPath(); ctx.arc(0, 0, 16, 0, Math.PI * 2); ctx.fill();
+            }
+            ctx.restore();
+        }
+    }
+
+    /* =====================================================================
+       4. POWER-UP GIFTS (SPAWNING ALONG STRAIGHT TRACK)
+       ===================================================================== */
+    const ITEM_TYPES = [
+        { id: 'chili', name: 'Zoomie Pepper', icon: '🌶️' },
+        { id: 'shield', name: 'Bubble Shield', icon: '🫧' },
+        { id: 'banana', name: 'Slippery Banana', icon: '🍌' },
+        { id: 'duck', name: 'Cheering Duckie', icon: '🦆' }
+    ];
+
+    class ItemManager {
+        constructor() {
+            this.activeBoxes = [];
+            this.activeProjectiles = [];
+        }
+
+        reset() {
+            this.activeBoxes = [];
+            this.activeProjectiles = [];
+        }
+
+        updateSpawns(leadY, trackW) {
+            const spawnInterval = 380;
+            const targetY = Math.floor(leadY / spawnInterval) * spawnInterval - 400;
+
+            if (!this.activeBoxes.some(b => Math.abs(b.y - targetY) < 100)) {
+                const halfW = trackW / 2 - 40;
+                [-halfW * 0.75, -halfW * 0.25, halfW * 0.25, halfW * 0.75].forEach(x => {
+                    this.activeBoxes.push({ x, y: targetY, active: true, radius: 20 });
+                });
+            }
+
+            this.activeBoxes = this.activeBoxes.filter(b => b.y < leadY + 1000);
+        }
+
+        useItem(racer) {
+            if (!racer.currentItem) return;
+            const itemId = racer.currentItem.id;
+            racer.currentItem = null;
+
+            if (window.soundEngine) window.soundEngine.playAnimalCry(racer.animalId);
+
+            if (itemId === 'chili') {
+                racer.boostTimer = 3.0;
+                racer.isBoosted = true;
+                if (window.soundEngine) window.soundEngine.playBoost();
+            } else if (itemId === 'shield') {
+                racer.hasShield = true;
+                racer.shieldTimer = 10.0;
+                if (window.soundEngine) window.soundEngine.playBubble();
+            } else if (itemId === 'banana') {
+                this.activeProjectiles.push({
+                    type: 'banana',
+                    x: racer.x,
+                    y: racer.y + 35,
+                    duration: 35
+                });
+            } else if (itemId === 'duck') {
+                racer.boostTimer = 3.5;
+                racer.isBoosted = true;
+                if (window.soundEngine) window.soundEngine.playAnimalCry('duck');
+            }
+        }
+
+        update(dt, racers, trackW) {
+            this.activeBoxes.forEach(box => {
+                if (box.active) {
+                    racers.forEach(r => {
+                        if (Math.hypot(r.x - box.x, r.y - box.y) < box.radius + 18) {
+                            box.active = false;
+                            if (!r.currentItem && !r.isRouletteRolling) {
+                                r.startItemRoulette();
+                            }
+                        }
+                    });
+                }
+            });
+
+            for (let i = this.activeProjectiles.length - 1; i >= 0; i--) {
+                const proj = this.activeProjectiles[i];
+                proj.duration -= dt;
+                racers.forEach(r => {
+                    if (Math.hypot(r.x - proj.x, r.y - proj.y) < 22 && r.wobbleTimer <= 0) {
+                        if (r.hasShield) {
+                            r.hasShield = false;
+                            proj.duration = -1;
+                            if (window.soundEngine) window.soundEngine.playBubble();
+                        } else {
+                            r.wobbleTimer = 0.8;
+                            r.speed *= 0.45;
+                            proj.duration = -1;
+                            if (window.soundEngine) window.soundEngine.playSlip();
+                        }
+                    }
+                });
+                if (proj.duration <= 0) this.activeProjectiles.splice(i, 1);
+            }
+        }
+
+        draw(ctx) {
+            this.activeBoxes.forEach(box => {
+                if (!box.active) return;
+                const bob = Math.sin(Date.now() * 0.005) * 4;
+                ctx.save();
+                ctx.translate(box.x, box.y + bob);
+
+                ctx.fillStyle = '#ff9f43';
+                ctx.beginPath();
+                ctx.roundRect(-14, -14, 28, 28, 6);
+                ctx.fill();
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2.5;
+                ctx.stroke();
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 18px "Fredoka", sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('🎁', 0, 1);
+                ctx.restore();
+            });
+
+            this.activeProjectiles.forEach(proj => {
+                ctx.save();
+                ctx.translate(proj.x, proj.y);
+                ctx.font = '22px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('🍌', 0, 0);
+                ctx.restore();
+            });
+        }
+    }
+
+    /* =====================================================================
+       5. COMPETITIVE STRAIGHT TRACK RUNNING PHYSICS
+       ===================================================================== */
+    class Racer {
+        constructor(config) {
+            this.id = config.id || 'p1';
+            this.name = config.name || 'Racer';
+            this.animalId = config.animalId || 'panda';
+            this.animType = config.animType || 'waddle';
+            this.isHuman = !!config.isHuman;
+            this.profile = ANIMAL_PROFILES[this.animalId] || ANIMAL_PROFILES.panda;
+
+            this.x = config.x || 0;
+            this.y = config.y || 0;
+            this.angle = -Math.PI / 2;
+            this.speed = 0;
+            this.radius = 20;
+
+            this.throttle = 0;
+            this.laneSteer = 0;
+            this.legPhase = Math.random() * Math.PI * 2;
+            this.footstepCooldown = 0;
+
+            this.currentItem = null;
+            this.isRouletteRolling = false;
+            this.rouletteTimer = 0;
+            this.isBoosted = false;
+            this.boostTimer = 0;
+            this.hasShield = false;
+            this.shieldTimer = 0;
+            this.wobbleTimer = 0;
+
+            this.distanceRun = 0;
+            this.rank = 1;
+            this.targetLaneX = this.x;
+        }
+
+        startItemRoulette() {
+            this.isRouletteRolling = true;
+            this.rouletteTimer = 1.0;
+            if (this.isHuman && window.soundEngine) window.soundEngine.playItemBox();
+        }
+
+        update(dt, trackWidth, avgY) {
+            if (this.speed > 0.1) {
+                this.legPhase += dt * (this.speed * 6.5);
+                this.footstepCooldown -= dt;
+                if (this.footstepCooldown <= 0 && this.isHuman && window.soundEngine) {
+                    window.soundEngine.playPatter();
+                    this.footstepCooldown = 0.3;
+                }
+            }
+
+            if (this.wobbleTimer > 0) this.wobbleTimer -= dt;
+
+            if (this.boostTimer > 0) {
+                this.boostTimer -= dt;
+                this.isBoosted = true;
+            } else {
+                this.isBoosted = false;
+            }
+
+            if (this.shieldTimer > 0) {
+                this.shieldTimer -= dt;
+                if (this.shieldTimer <= 0) this.hasShield = false;
+            }
+
+            if (this.isRouletteRolling) {
+                this.rouletteTimer -= dt;
+                if (this.rouletteTimer <= 0) {
+                    this.isRouletteRolling = false;
+                    this.currentItem = ITEM_TYPES[Math.floor(Math.random() * ITEM_TYPES.length)];
+                    if (this.isHuman && window.soundEngine) window.soundEngine.playItemReady();
+                }
+            }
+
+            // Balanced competitive baseline speed
+            let maxSpeed = this.profile.stats.speed;
+
+            // Rubber-band / Pack drafting:
+            // If trailing behind the pack average, gain a subtle draft catch-up (+6%)
+            // If way out in front, face gentle headwind (-4%) so races remain tight and dramatic!
+            const distFromAvg = avgY - this.y; // positive means ahead, negative means behind
+            if (distFromAvg < -40) {
+                maxSpeed *= 1.06; // slight catchup boost
+            } else if (distFromAvg > 70) {
+                maxSpeed *= 0.96; // headwind
+            }
+
+            if (this.isBoosted) maxSpeed *= 1.35;
+
+            // Throttle forward acceleration
+            if (this.throttle > 0) {
+                this.speed = Math.min(maxSpeed, this.speed + this.profile.stats.accel * this.throttle);
+            } else if (this.throttle < 0) {
+                this.speed = Math.max(0, this.speed - this.profile.stats.accel * 1.5);
+            } else {
+                this.speed *= 0.96;
+            }
+
+            this.y -= this.speed;
+            this.distanceRun += this.speed * 0.15;
+            this.x += this.laneSteer * 2.8;
+
+            const halfW = trackWidth / 2 - 20;
+            if (this.x < -halfW) {
+                this.x = -halfW;
+                if (this.isHuman && window.soundEngine) window.soundEngine.playSoftBump();
+            } else if (this.x > halfW) {
+                this.x = halfW;
+                if (this.isHuman && window.soundEngine) window.soundEngine.playSoftBump();
+            }
+        }
+
+        checkRacerCollision(other) {
+            const dx = other.x - this.x;
+            const dy = other.y - this.y;
+            const dist = Math.hypot(dx, dy);
+            const minDist = this.radius + other.radius;
+
+            if (dist < minDist && dist > 0.001) {
+                const overlap = (minDist - dist) / 2;
+                const nx = dx / dist;
+                const ny = dy / dist;
+
+                this.x -= nx * overlap * 0.7;
+                this.y -= ny * overlap * 0.7;
+                other.x += nx * overlap * 0.7;
+                other.y += ny * overlap * 0.7;
+
+                if ((this.isHuman || other.isHuman) && window.soundEngine) {
+                    window.soundEngine.playSoftBump();
+                }
+            }
+        }
+    }
+
+    /* =====================================================================
+       6. STRAIGHT TRACK BOT AI (STEADY LANE RUNNING)
+       ===================================================================== */
+    class BotAI {
+        static updateBot(racer, dt, trackWidth, itemManager) {
+            if (racer.isHuman) return;
+
+            // Bots run steadily forward at full trot
+            racer.throttle = 1.0;
+
+            const diffX = racer.targetLaneX - racer.x;
+            if (Math.abs(diffX) > 4) {
+                racer.laneSteer = Math.sign(diffX) * 0.6;
+            } else {
+                racer.laneSteer = 0;
+                if (Math.random() < 0.005) {
+                    const halfW = trackWidth / 2 - 40;
+                    racer.targetLaneX = (Math.random() - 0.5) * halfW * 1.8;
+                }
+            }
+
+            // Casual friendly item usage
+            if (racer.currentItem && !racer.isRouletteRolling && Math.random() < 0.015) {
+                itemManager.useItem(racer);
+            }
+        }
+    }
+
+    /* =====================================================================
+       7. MAIN GAME CONTROLLER & HUD
+       ===================================================================== */
+    class Game {
+        constructor() {
+            this.canvas = document.getElementById('gameCanvas');
+            this.ctx = this.canvas.getContext('2d');
+            this.speedDialCanvas = document.getElementById('speedDialCanvas');
+            this.dialCtx = this.speedDialCanvas ? this.speedDialCanvas.getContext('2d') : null;
+
+            this.isDarkMode = localStorage.getItem('derby_theme') === 'dark';
+            this.applyTheme();
+
+            const savedMobile = localStorage.getItem('derby_mobile_settings');
+            this.mobileSettings = {
+                mode: 'auto',
+                size: 'large',
+                autoRun: false,
+                haptics: true,
+                opacity: '0.9',
+                swapHands: false
+            };
+            if (savedMobile) {
+                try { Object.assign(this.mobileSettings, JSON.parse(savedMobile)); } catch (e) {}
+            }
+            this.touchState = { left: false, right: false, gas: false, brake: false };
+            this.applyMobileSettings();
+
+            this.state = 'MENU';
+            this.previousState = 'MENU';
+            this.hasActiveRace = false;
+
+            this.tracks = TrackManager.getTracks();
+            this.currentTrackIndex = 0;
+            this.currentTrack = this.tracks[0];
+
+            this.racers = [];
+            this.humanRacer = null;
+            this.itemManager = new ItemManager();
+
+            this.rosterConfig = [
+                { id: 'r1', name: 'Po Po', animalId: 'panda', animType: 'waddle', isHuman: true, enabled: true },
+                { id: 'r2', name: 'Barnaby', animalId: 'rabbit', animType: 'bouncy', isHuman: false, enabled: true },
+                { id: 'r3', name: 'Shelldon', animalId: 'tortoise', animType: 'tippytap', isHuman: false, enabled: true },
+                { id: 'r4', name: 'Nugget', animalId: 'chicken', animType: 'tippytap', isHuman: false, enabled: true },
+                { id: 'r5', name: 'Admiral Ducky', animalId: 'duck', animType: 'waddle', isHuman: false, enabled: true },
+                { id: 'r6', name: 'Truffles', animalId: 'piglet', animType: 'zoomies', isHuman: false, enabled: true },
+                { id: 'r7', name: 'Mochi', animalId: 'kitten', animType: 'zoomies', isHuman: false, enabled: true },
+                { id: 'r8', name: 'Pip', animalId: 'hamster', animType: 'bouncy', isHuman: false, enabled: true }
+            ];
+
+            this.selectedMinutes = 2;
+            this.remainingTime = 120;
+
+            this.promptTimeRemaining = 10.0;
+            this.showingControlsPrompt = false;
+
+            this.camera = { x: 0, y: 0 };
+            this.countdownValue = 3;
+            this.countdownTimer = 0;
+
+            this.keys = {};
+            this.setupInput();
+
+            this.lastTime = 0;
+            this.resize();
+            window.addEventListener('resize', () => {
+                this.resize();
+                this.applyMobileSettings();
+            });
+
+            this.confetti = [];
+            requestAnimationFrame((t) => this.loop(t));
+        }
+
+        applyTheme() {
+            document.body.classList.toggle('theme-dark', this.isDarkMode);
+            document.body.classList.toggle('theme-light', !this.isDarkMode);
+            localStorage.setItem('derby_theme', this.isDarkMode ? 'dark' : 'light');
+            const themeBtn = document.getElementById('themeToggleBtn');
+            if (themeBtn) themeBtn.innerHTML = this.isDarkMode ? '🌙 Dark Mode' : '☀️ Light Mode';
+        }
+
+        toggleTheme() {
+            this.isDarkMode = !this.isDarkMode;
+            this.applyTheme();
+        }
+
+        applyMobileSettings() {
+            document.body.classList.remove('mobile-mode-always', 'mobile-mode-off', 'mobile-mode-auto');
+            document.body.classList.add(`mobile-mode-${this.mobileSettings.mode}`);
+
+            document.body.classList.remove('btn-size-normal', 'btn-size-large', 'btn-size-jumbo');
+            document.body.classList.add(`btn-size-${this.mobileSettings.size}`);
+
+            document.body.classList.remove('btn-opacity-50', 'btn-opacity-75', 'btn-opacity-90', 'btn-opacity-100');
+            const opClass = `btn-opacity-${Math.round(parseFloat(this.mobileSettings.opacity || 0.9) * 100)}`;
+            document.body.classList.add(opClass);
+
+            document.body.classList.toggle('touch-swap-hands', !!this.mobileSettings.swapHands);
+
+            const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || window.innerWidth <= 900;
+            const isActive = this.mobileSettings.mode === 'always' || (this.mobileSettings.mode === 'auto' && isTouchDevice);
+            document.body.classList.toggle('mobile-active', isActive);
+
+            const autoRunPill = document.getElementById('touchAutoRunPill');
+            const autoRunLabel = document.getElementById('touchAutoRunLabel');
+            if (autoRunPill && autoRunLabel) {
+                autoRunPill.classList.toggle('auto-run-active', !!this.mobileSettings.autoRun);
+                autoRunLabel.textContent = this.mobileSettings.autoRun ? 'CRUISE: ON' : 'CRUISE: OFF';
+            }
+
+            const statusBadge = document.getElementById('mobileStatusBadge');
+            if (statusBadge) {
+                if (this.mobileSettings.mode === 'always') statusBadge.textContent = 'ALWAYS ON';
+                else if (this.mobileSettings.mode === 'off') statusBadge.textContent = 'KEYBOARD ONLY';
+                else statusBadge.textContent = isTouchDevice ? 'TOUCH ACTIVE' : 'AUTO READY';
+            }
+
+            const modalBadge = document.getElementById('modalActiveStatusBadge');
+            if (modalBadge) {
+                modalBadge.textContent = isActive ? 'ACTIVE' : 'IDLE';
+            }
+
+            this.syncMobileUIButtons();
+            localStorage.setItem('derby_mobile_settings', JSON.stringify(this.mobileSettings));
+        }
+
+        syncMobileUIButtons() {
+            const setGroup = (groupId, attr, val) => {
+                const grp = document.getElementById(groupId);
+                if (!grp) return;
+                grp.querySelectorAll('.opt-btn').forEach(btn => {
+                    const match = String(btn.dataset[attr]) === String(val);
+                    btn.classList.toggle('active', match);
+                });
+            };
+
+            setGroup('menuMobileModeGroup', 'mode', this.mobileSettings.mode);
+            setGroup('modalMobileModeGroup', 'mode', this.mobileSettings.mode);
+
+            setGroup('menuMobileSizeGroup', 'size', this.mobileSettings.size);
+            setGroup('modalMobileSizeGroup', 'size', this.mobileSettings.size);
+
+            setGroup('menuMobileAutoRunGroup', 'autorun', this.mobileSettings.autoRun);
+            setGroup('modalMobileAutoRunGroup', 'autorun', this.mobileSettings.autoRun);
+
+            setGroup('menuMobileHapticsGroup', 'haptics', this.mobileSettings.haptics);
+            setGroup('modalMobileHapticsGroup', 'haptics', this.mobileSettings.haptics);
+
+            setGroup('modalMobileHandGroup', 'swap', this.mobileSettings.swapHands);
+            setGroup('modalMobileOpacityGroup', 'opacity', this.mobileSettings.opacity);
+        }
+
+        setMobileOption(key, value) {
+            this.mobileSettings[key] = value;
+            this.applyMobileSettings();
+            this.triggerHaptic(20);
+            if (window.soundEngine) window.soundEngine.playHop();
+        }
+
+        toggleAutoRun() {
+            this.mobileSettings.autoRun = !this.mobileSettings.autoRun;
+            this.applyMobileSettings();
+            this.triggerHaptic(25);
+            if (window.soundEngine) window.soundEngine.playHop();
+        }
+
+        triggerHaptic(ms = 20) {
+            if (this.mobileSettings.haptics && window.navigator && window.navigator.vibrate) {
+                try { window.navigator.vibrate(ms); } catch (e) {}
+            }
+        }
+
+        triggerDash() {
+            if (this.humanRacer && !this.humanRacer.isBoosted && this.state === 'RACING') {
+                this.humanRacer.boostTimer = 1.4;
+                this.humanRacer.isBoosted = true;
+                if (window.soundEngine) window.soundEngine.playBoost();
+                this.triggerHaptic(30);
+            }
+        }
+
+        triggerItem() {
+            if (this.humanRacer && this.state === 'RACING') {
+                this.itemManager.useItem(this.humanRacer);
+                this.triggerHaptic(25);
+            }
+        }
+
+        triggerCry() {
+            if (this.humanRacer && window.soundEngine) {
+                window.soundEngine.playAnimalCry(this.humanRacer.animalId);
+                this.triggerHaptic(20);
+            }
+        }
+
+        resize() {
+            if (!this.canvas) return;
+            const container = document.getElementById('gameContainer') || document.body;
+            this.canvas.width = container.clientWidth || window.innerWidth;
+            this.canvas.height = container.clientHeight || window.innerHeight;
+        }
+
+        setupInput() {
+            window.addEventListener('keydown', (e) => {
+                const key = e.key.toLowerCase();
+                this.keys[key] = true;
+                this.keys[e.code] = true;
+
+                if (window.soundEngine) window.soundEngine.resume();
+
+                if (this.showingControlsPrompt && (e.key === ' ' || key === 'enter')) {
+                    this.skipControlsPrompt();
+                    return;
+                }
+
+                if (e.key === 'Escape' || key === 'p') {
+                    if (this.state === 'RACING' || this.state === 'COUNTDOWN') {
+                        this.pauseGame();
+                    } else if (this.state === 'PAUSED') {
+                        this.resumeGame();
+                    }
+                }
+
+                if ((key === 'h' || key === 'b') && this.humanRacer) {
+                    this.triggerCry();
+                }
+
+                if (e.key === ' ' || key === 'shift') {
+                    this.triggerDash();
+                }
+
+                if ((key === 'e' || e.key === 'Enter') && this.humanRacer && this.state === 'RACING') {
+                    this.triggerItem();
+                }
+            });
+
+            window.addEventListener('keyup', (e) => {
+                this.keys[e.key.toLowerCase()] = false;
+                this.keys[e.code] = false;
+            });
+
+            this.setupTouchInput();
+        }
+
+        setupTouchInput() {
+            const bindHold = (id, onStart, onEnd) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+
+                const start = (e) => {
+                    if (e.cancelable) e.preventDefault();
+                    el.classList.add('active-press');
+                    if (window.soundEngine) window.soundEngine.resume();
+                    if (this.showingControlsPrompt) {
+                        this.skipControlsPrompt();
+                        return;
+                    }
+                    onStart();
+                };
+
+                const end = (e) => {
+                    if (e.cancelable) e.preventDefault();
+                    el.classList.remove('active-press');
+                    onEnd();
+                };
+
+                el.addEventListener('touchstart', start, { passive: false });
+                el.addEventListener('touchend', end, { passive: false });
+                el.addEventListener('touchcancel', end, { passive: false });
+                el.addEventListener('mousedown', start);
+                el.addEventListener('mouseup', end);
+                el.addEventListener('mouseleave', end);
+            };
+
+            const bindTap = (id, onTap) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+
+                const tap = (e) => {
+                    if (e.cancelable) e.preventDefault();
+                    el.classList.add('active-press');
+                    setTimeout(() => el.classList.remove('active-press'), 120);
+                    if (window.soundEngine) window.soundEngine.resume();
+                    if (this.showingControlsPrompt) {
+                        this.skipControlsPrompt();
+                        return;
+                    }
+                    onTap();
+                };
+
+                el.addEventListener('touchstart', tap, { passive: false });
+                el.addEventListener('click', (e) => {
+                    if (e.pointerType !== 'touch') tap(e);
+                });
+            };
+
+            // Steering (Left / Right)
+            bindHold('touchLeft',
+                () => { this.touchState.left = true; this.triggerHaptic(15); },
+                () => { this.touchState.left = false; }
+            );
+            bindHold('touchRight',
+                () => { this.touchState.right = true; this.triggerHaptic(15); },
+                () => { this.touchState.right = false; }
+            );
+
+            // Throttle (Gas / Brake)
+            bindHold('touchGas',
+                () => { this.touchState.gas = true; this.triggerHaptic(18); },
+                () => { this.touchState.gas = false; }
+            );
+            bindHold('touchBrake',
+                () => { this.touchState.brake = true; this.triggerHaptic(18); },
+                () => { this.touchState.brake = false; }
+            );
+
+            // Action taps
+            bindTap('touchDrift', () => this.triggerDash());
+            bindTap('touchItem', () => this.triggerItem());
+            bindTap('touchHonk', () => this.triggerCry());
+
+            // Center controls
+            bindTap('touchAutoRunPill', () => this.toggleAutoRun());
+            bindTap('touchMobilePauseBtn', () => {
+                if (this.state === 'RACING') this.pauseGame();
+                else if (this.state === 'PAUSED') this.resumeGame();
+            });
+        }
+
+        startNewRaceFlow(trackIndex = 0) {
+            this.currentTrackIndex = trackIndex;
+            this.currentTrack = this.tracks[trackIndex];
+            this.itemManager.reset();
+
+            this.remainingTime = this.selectedMinutes * 60;
+
+            const activeSlots = this.rosterConfig.filter(s => s.enabled);
+            if (activeSlots.length < 2) {
+                activeSlots.push({ id: 'bot_fallback', name: 'Speedy Bun', animalId: 'rabbit', animType: 'bouncy', isHuman: false, enabled: true });
+            }
+
+            this.racers = [];
+            this.humanRacer = null;
+
+            const laneW = this.currentTrack.roadWidth / this.currentTrack.numLanes;
+            const halfW = this.currentTrack.roadWidth / 2;
+
+            activeSlots.forEach((slot, idx) => {
+                const laneIdx = idx % this.currentTrack.numLanes;
+                const laneX = -halfW + laneW * (laneIdx + 0.5);
+                const startY = 100;
+
+                const racer = new Racer({
+                    id: slot.id,
+                    name: slot.name,
+                    animalId: slot.animalId,
+                    animType: slot.animType,
+                    isHuman: slot.isHuman,
+                    x: laneX,
+                    y: startY
+                });
+
+                this.racers.push(racer);
+                if (slot.isHuman && !this.humanRacer) {
+                    this.humanRacer = racer;
+                }
+            });
+
+            if (!this.humanRacer && this.racers.length > 0) {
+                this.humanRacer = this.racers[0];
+            }
+
+            document.getElementById('mainMenu').style.display = 'none';
+            document.getElementById('customizeScreen').style.display = 'none';
+            document.getElementById('podiumScreen').style.display = 'none';
+            document.getElementById('pauseModal').style.display = 'none';
+
+            this.buildSideRadarNodes();
+            this.showControlsPrompt();
+        }
+
+        buildSideRadarNodes() {
+            const trackEl = document.getElementById('sideRadarTrack');
+            if (!trackEl) return;
+            // Clear existing avatars
+            const existing = trackEl.querySelectorAll('.radar-avatar-node');
+            existing.forEach(e => e.remove());
+
+            this.racers.forEach(r => {
+                const node = document.createElement('div');
+                node.className = `radar-avatar-node ${r.isHuman ? 'is-player' : ''}`;
+                node.id = `radarNode_${r.id}`;
+                node.innerText = r.profile.avatar;
+                node.title = r.name;
+                trackEl.appendChild(node);
+            });
+        }
+
+        showControlsPrompt() {
+            this.showingControlsPrompt = true;
+            this.promptTimeRemaining = 10.0;
+            const modal = document.getElementById('controlsPromptModal');
+            if (modal) modal.style.display = 'flex';
+        }
+
+        skipControlsPrompt() {
+            this.showingControlsPrompt = false;
+            const modal = document.getElementById('controlsPromptModal');
+            if (modal) modal.style.display = 'none';
+
+            this.state = 'COUNTDOWN';
+            this.hasActiveRace = true;
+            this.countdownValue = 3;
+            this.countdownTimer = 1.0;
+            this.confetti = [];
+
+            document.getElementById('gameHUD').style.display = 'block';
+
+            const resumeBtn = document.getElementById('resumeRaceBtn');
+            if (resumeBtn) resumeBtn.style.display = 'inline-flex';
+
+            if (window.soundEngine) {
+                window.soundEngine.resume();
+                window.soundEngine.playCountdown(3);
+                window.soundEngine.startMusic(this.currentTrack.musicId);
+            }
+        }
+
+        pauseGame() {
+            if (this.state !== 'RACING' && this.state !== 'COUNTDOWN') return;
+            this.previousState = this.state;
+            this.state = 'PAUSED';
+            document.getElementById('pauseModal').style.display = 'flex';
+            if (window.soundEngine) window.soundEngine.stopMusic();
+        }
+
+        resumeGame() {
+            if (this.state !== 'PAUSED') return;
+            this.state = this.previousState || 'RACING';
+            document.getElementById('pauseModal').style.display = 'none';
+            document.getElementById('mainMenu').style.display = 'none';
+            document.getElementById('gameHUD').style.display = 'block';
+            if (window.soundEngine && this.currentTrack) {
+                window.soundEngine.startMusic(this.currentTrack.musicId);
+            }
+        }
+
+        newGame() {
+            this.hasActiveRace = false;
+            this.state = 'MENU';
+            this.showingControlsPrompt = false;
+            document.getElementById('controlsPromptModal').style.display = 'none';
+            document.getElementById('pauseModal').style.display = 'none';
+            document.getElementById('gameHUD').style.display = 'none';
+            document.getElementById('podiumScreen').style.display = 'none';
+            document.getElementById('customizeScreen').style.display = 'none';
+            document.getElementById('mainMenu').style.display = 'flex';
+
+            const resumeBtn = document.getElementById('resumeRaceBtn');
+            if (resumeBtn) resumeBtn.style.display = 'none';
+
+            if (window.soundEngine) window.soundEngine.stopMusic();
+        }
+
+        loop(timestamp) {
+            if (!this.lastTime) this.lastTime = timestamp;
+            const dt = Math.min(0.08, (timestamp - this.lastTime) / 1000);
+            this.lastTime = timestamp;
+
+            this.update(dt);
+            this.render();
+
+            requestAnimationFrame((t) => this.loop(t));
+        }
+
+        update(dt) {
+            if (this.showingControlsPrompt) {
+                this.promptTimeRemaining -= dt;
+                const pill = document.getElementById('promptCountdownPill');
+                if (pill) {
+                    const sec = Math.max(1, Math.ceil(this.promptTimeRemaining));
+                    pill.innerText = `Starting race in ${sec}s...`;
+                }
+                if (this.promptTimeRemaining <= 0) {
+                    this.skipControlsPrompt();
+                }
+                return;
+            }
+
+            if (this.state === 'PAUSED') return;
+
+            if (this.state === 'COUNTDOWN') {
+                this.countdownTimer -= dt;
+                if (this.countdownTimer <= 0) {
+                    this.countdownValue--;
+                    this.countdownTimer = 1.0;
+                    if (window.soundEngine) window.soundEngine.playCountdown(this.countdownValue);
+                    if (this.countdownValue < 0) this.state = 'RACING';
+                }
+            }
+
+            if (this.state === 'RACING') {
+                this.remainingTime -= dt;
+                if (this.remainingTime <= 0) {
+                    this.remainingTime = 0;
+                    this.triggerPodium();
+                    return;
+                }
+
+                if (this.humanRacer) {
+                    let th = 0;
+                    const isUp = this.keys['arrowup'] || this.keys['w'] || this.keys['keyw'] || this.touchState.gas;
+                    const isDown = this.keys['arrowdown'] || this.keys['s'] || this.keys['keys'] || this.touchState.brake;
+
+                    if (this.mobileSettings && this.mobileSettings.autoRun) {
+                        if (isDown) {
+                            th = -0.55;
+                        } else if (isUp) {
+                            th = 1.15;
+                        } else {
+                            th = 0.85; // Auto-Run Cruising pace!
+                        }
+                    } else {
+                        if (isUp) th += 1.0;
+                        if (isDown) th -= 0.6;
+                    }
+                    this.humanRacer.throttle = th;
+
+                    let st = 0;
+                    const isLeft = this.keys['arrowleft'] || this.keys['a'] || this.keys['keya'] || this.touchState.left;
+                    const isRight = this.keys['arrowright'] || this.keys['d'] || this.keys['keyd'] || this.touchState.right;
+                    if (isLeft) st -= 1.0;
+                    if (isRight) st += 1.0;
+                    this.humanRacer.laneSteer = st;
+                }
+
+                // Average Y position for competitive drafting
+                const avgY = this.racers.reduce((acc, r) => acc + r.y, 0) / (this.racers.length || 1);
+
+                this.racers.forEach(r => {
+                    if (!r.isHuman) BotAI.updateBot(r, dt, this.currentTrack.roadWidth, this.itemManager);
+                });
+
+                this.racers.forEach(r => {
+                    r.update(dt, this.currentTrack.roadWidth, avgY);
+                });
+
+                for (let i = 0; i < this.racers.length; i++) {
+                    for (let j = i + 1; j < this.racers.length; j++) {
+                        this.racers[i].checkRacerCollision(this.racers[j]);
+                    }
+                }
+
+                const leadY = Math.min(...this.racers.map(r => r.y));
+                this.itemManager.updateSpawns(leadY, this.currentTrack.roadWidth);
+                this.itemManager.update(dt, this.racers, this.currentTrack.roadWidth);
+
+                this.calculateRanks();
+                this.updateSideRadar();
+            }
+
+            if (this.humanRacer) {
+                this.camera.x += (0 - this.camera.x) * (dt * 4.0);
+                const targetY = this.humanRacer.y - 120;
+                this.camera.y += (targetY - this.camera.y) * (dt * 5.0);
+            }
+
+            this.updateHUD();
+
+            if (this.state === 'PODIUM') {
+                this.updateConfetti(dt);
+            }
+        }
+
+        calculateRanks() {
+            const sorted = [...this.racers].sort((a, b) => b.distanceRun - a.distanceRun);
+            sorted.forEach((r, idx) => { r.rank = idx + 1; });
+        }
+
+        // Update Side Distance Map Radar
+        updateSideRadar() {
+            if (!this.humanRacer) return;
+            const trackEl = document.getElementById('sideRadarTrack');
+            if (!trackEl) return;
+
+            const leadDist = Math.max(...this.racers.map(r => r.distanceRun));
+            const tailDist = Math.min(...this.racers.map(r => r.distanceRun));
+            const range = Math.max(40, leadDist - tailDist + 20);
+
+            this.racers.forEach(r => {
+                const node = document.getElementById(`radarNode_${r.id}`);
+                if (node) {
+                    // Position along vertical track: top (10%) is leader, bottom (90%) is trailer
+                    const fraction = 1 - ((r.distanceRun - (leadDist - range)) / range);
+                    const pct = Math.max(8, Math.min(92, fraction * 100));
+                    node.style.top = `${pct}%`;
+                }
+            });
+        }
+
+        updateHUD() {
+            if (!this.humanRacer) return;
+
+            const posEl = document.getElementById('hudPosition');
+            if (posEl) {
+                const suffixes = ['ST', 'ND', 'RD', 'TH', 'TH', 'TH', 'TH', 'TH'];
+                const rank = this.humanRacer.rank || 1;
+                posEl.innerHTML = `<span class="rank-number">${rank}</span><span class="rank-suffix">${suffixes[rank - 1] || 'TH'}</span>`;
+            }
+
+            const timerEl = document.getElementById('hudTimerBadge');
+            if (timerEl) {
+                const mins = Math.floor(Math.max(0, this.remainingTime) / 60);
+                const secs = Math.floor(Math.max(0, this.remainingTime) % 60);
+                timerEl.innerText = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+            }
+
+            // Numeric speed & distance
+            const speedKmh = (this.humanRacer.speed * 4.6).toFixed(1);
+            const speedNumEl = document.getElementById('hudSpeedNumber');
+            if (speedNumEl) speedNumEl.innerText = speedKmh;
+
+            const distEl = document.getElementById('hudDistance');
+            if (distEl) distEl.innerText = `${Math.round(this.humanRacer.distanceRun)} METERS`;
+
+            // Draw Speedometer Mini-Gauge
+            this.drawSpeedometer(parseFloat(speedKmh));
+
+            const itemIconEl = document.getElementById('hudItemIcon');
+            if (itemIconEl) {
+                if (this.humanRacer.isRouletteRolling) {
+                    const randomItem = ITEM_TYPES[Math.floor(Date.now() / 80) % ITEM_TYPES.length];
+                    itemIconEl.innerText = randomItem.icon;
+                    itemIconEl.classList.add('roulette-spin');
+                } else if (this.humanRacer.currentItem) {
+                    itemIconEl.innerText = this.humanRacer.currentItem.icon;
+                    itemIconEl.classList.remove('roulette-spin');
+                } else {
+                    itemIconEl.innerText = '';
+                    itemIconEl.classList.remove('roulette-spin');
+                }
+            }
+        }
+
+        // Draw cute curved analog speed meter with graduated needle
+        drawSpeedometer(speedVal) {
+            if (!this.dialCtx) return;
+            const ctx = this.dialCtx;
+            ctx.clearRect(0, 0, 70, 50);
+
+            const cx = 35;
+            const cy = 42;
+            const radius = 28;
+
+            // Outer Arc track
+            ctx.lineWidth = 5;
+            ctx.strokeStyle = this.isDarkMode ? '#2f3542' : '#e4e7eb';
+            ctx.beginPath();
+            ctx.arc(cx, cy, radius, Math.PI, 0, false);
+            ctx.stroke();
+
+            // Colored Speed Arc (Green -> Yellow -> Orange)
+            const maxSpeed = 24.0;
+            const ratio = Math.min(1.0, speedVal / maxSpeed);
+            const speedAngle = Math.PI + ratio * Math.PI;
+
+            const grad = ctx.createLinearGradient(0, cy, 70, cy);
+            grad.addColorStop(0, '#2ed573');
+            grad.addColorStop(0.6, '#ffa502');
+            grad.addColorStop(1, '#ff4757');
+
+            ctx.strokeStyle = grad;
+            ctx.beginPath();
+            ctx.arc(cx, cy, radius, Math.PI, speedAngle, false);
+            ctx.stroke();
+
+            // Needle
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(speedAngle);
+            ctx.fillStyle = '#ff4757';
+            ctx.beginPath();
+            ctx.moveTo(0, -2.5);
+            ctx.lineTo(radius - 4, 0);
+            ctx.lineTo(0, 2.5);
+            ctx.closePath();
+            ctx.fill();
+
+            // Center needle hub
+            ctx.fillStyle = '#2d3436';
+            ctx.beginPath();
+            ctx.arc(0, 0, 4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        render() {
+            if (!this.canvas) return;
+            const ctx = this.ctx;
+            const width = this.canvas.width;
+            const height = this.canvas.height;
+
+            ctx.clearRect(0, 0, width, height);
+
+            if (this.state === 'MENU' || this.state === 'CUSTOMIZE') {
+                this.renderMenuBackground(ctx, width, height);
+                return;
+            }
+
+            ctx.save();
+            ctx.translate(width / 2, height * 0.7);
+            ctx.translate(-this.camera.x, -this.camera.y);
+
+            const groundColor = this.isDarkMode ? this.currentTrack.darkColors.ground : this.currentTrack.lightColors.ground;
+            ctx.fillStyle = groundColor;
+            ctx.fillRect(-2000, this.camera.y - height, 4000, height * 2.5);
+
+            TrackManager.drawStraightTrack(ctx, this.currentTrack, this.camera.y, height, this.isDarkMode);
+            this.itemManager.draw(ctx);
+
+            const sortedRacers = [...this.racers].sort((a, b) => b.y - a.y);
+            sortedRacers.forEach(r => AnimalRenderer.drawRacer(ctx, r, this.isDarkMode));
+
+            ctx.restore();
+
+            if (this.state === 'COUNTDOWN') {
+                this.renderCountdown(ctx, width, height);
+            }
+        }
+
+        renderCountdown(ctx, w, h) {
+            ctx.save();
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+            ctx.fillRect(0, 0, w, h);
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.font = 'bold 96px "Fredoka", sans-serif';
+
+            let text = `${this.countdownValue}`;
+            let color = '#feca57';
+            if (this.countdownValue === 0) {
+                text = 'READY... TROT!';
+                color = '#2ed573';
+            }
+
+            ctx.shadowColor = color;
+            ctx.shadowBlur = 24;
+            ctx.fillStyle = color;
+            ctx.fillText(text, w / 2, h / 2 - 20);
+
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 4;
+            ctx.strokeText(text, w / 2, h / 2 - 20);
+            ctx.restore();
+        }
+
+        renderMenuBackground(ctx, w, h) {
+            const bgGrad = ctx.createLinearGradient(0, 0, 0, h);
+            if (this.isDarkMode) {
+                bgGrad.addColorStop(0, '#101720');
+                bgGrad.addColorStop(1, '#0b0f14');
+            } else {
+                bgGrad.addColorStop(0, '#a8e6cf');
+                bgGrad.addColorStop(1, '#dcedc1');
+            }
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(0, 0, w, h);
+
+            const time = Date.now() * 0.001;
+            const animals = ['🐼', '🐰', '🐢', '🐥', '🦆', '🐷', '🐱', '🐹'];
+            ctx.font = '38px sans-serif';
+            ctx.textAlign = 'center';
+            for (let i = 0; i < animals.length; i++) {
+                const x = (w * 0.12 * (i + 1) + Math.sin(time + i) * 18);
+                const y = (h * 0.72 + Math.cos(time * 1.5 + i) * 22);
+                ctx.fillText(animals[i], x, y);
+            }
+        }
+
+        triggerPodium() {
+            this.state = 'PODIUM';
+            if (window.soundEngine) {
+                window.soundEngine.stopMusic();
+                window.soundEngine.playVictory();
+            }
+
+            document.getElementById('gameHUD').style.display = 'none';
+            document.getElementById('podiumScreen').style.display = 'flex';
+            this.initConfetti();
+
+            const sorted = [...this.racers].sort((a, b) => b.distanceRun - a.distanceRun);
+            const top3 = sorted.slice(0, 3);
+
+            const fillSlot = (id, racer) => {
+                const el = document.getElementById(id);
+                if (!el || !racer) return;
+                el.innerHTML = `
+                    <div class="podium-animal">${racer.profile.avatar}</div>
+                    <div class="podium-name">${racer.name} ${racer.isHuman ? '⭐' : ''}</div>
+                    <div style="font-size:12px; font-weight:800; color:var(--accent);">${Math.round(racer.distanceRun)}m</div>
+                `;
+            };
+
+            fillSlot('podiumFirst', top3[0]);
+            fillSlot('podiumSecond', top3[1]);
+            fillSlot('podiumThird', top3[2]);
+
+            const tbody = document.getElementById('leaderboardBody');
+            if (tbody) {
+                tbody.innerHTML = sorted.map((r, i) => `
+                    <tr class="${r.isHuman ? 'highlight-row' : ''}">
+                        <td><strong>${i + 1}</strong></td>
+                        <td>${r.profile.avatar} ${r.name}</td>
+                        <td>${Math.round(r.distanceRun)} Meters</td>
+                        <td>${r.isHuman ? '<span class="badge-human">YOU</span>' : '<span class="badge-bot">BOT</span>'}</td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        initConfetti() {
+            this.confetti = [];
+            const colors = ['#ff4757', '#ffa502', '#2ed573', '#1e90ff', '#ff6b81', '#ffffff'];
+            for (let i = 0; i < 90; i++) {
+                this.confetti.push({
+                    x: Math.random() * this.canvas.width,
+                    y: -Math.random() * 200,
+                    vx: (Math.random() - 0.5) * 3,
+                    vy: 1.5 + Math.random() * 3,
+                    size: 6 + Math.random() * 8,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    rotation: Math.random() * Math.PI * 2,
+                    rotSpeed: (Math.random() - 0.5) * 5
+                });
+            }
+        }
+
+        updateConfetti(dt) {
+            const ctx = this.ctx;
+            this.confetti.forEach(c => {
+                c.x += c.vx;
+                c.y += c.vy;
+                c.rotation += c.rotSpeed * dt;
+                if (c.y > this.canvas.height) {
+                    c.y = -20;
+                    c.x = Math.random() * this.canvas.width;
+                }
+                ctx.save();
+                ctx.translate(c.x, c.y);
+                ctx.rotate(c.rotation);
+                ctx.fillStyle = c.color;
+                ctx.fillRect(-c.size / 2, -c.size / 2, c.size, c.size * 0.6);
+                ctx.restore();
+            });
+        }
+    }
+
+    /* =====================================================================
+       8. INITIALIZE GAME & WIRE UP ALL USER INTERFACES
+       ===================================================================== */
+    window.addEventListener('DOMContentLoaded', () => {
+        const game = new Game();
+        window.game = game;
+
+        let selectedTrackIndex = 0;
+        let isCupMode = false;
+        let cupCurrentRace = 0;
+
+        // Timer Selection Buttons
+        const customInput = document.getElementById('customMinutesInput');
+        document.querySelectorAll('.timer-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.timer-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                const val = btn.getAttribute('data-mins');
+                if (val === 'custom') {
+                    game.selectedMinutes = Math.max(1, parseInt(customInput.value, 10) || 3);
+                } else {
+                    game.selectedMinutes = parseInt(val, 10);
+                }
+                if (window.soundEngine) window.soundEngine.playHop();
+            });
+        });
+
+        if (customInput) {
+            customInput.addEventListener('input', () => {
+                document.querySelectorAll('.timer-btn').forEach(b => b.classList.remove('active'));
+                document.getElementById('customTimerBtn').classList.add('active');
+                game.selectedMinutes = Math.max(1, parseInt(customInput.value, 10) || 3);
+            });
+        }
+
+        // Track Selection Cards
+        const trackGrid = document.getElementById('trackGrid');
+        if (trackGrid) {
+            trackGrid.innerHTML = '';
+            game.tracks.forEach((track, idx) => {
+                const card = document.createElement('div');
+                card.className = `track-card ${idx === 0 ? 'active' : ''}`;
+                card.innerHTML = `
+                    <div class="track-icon">${track.icon}</div>
+                    <div class="track-name">${track.name}</div>
+                    <div class="track-desc">${track.subtitle}</div>
+                `;
+                card.addEventListener('click', () => {
+                    document.querySelectorAll('.track-card').forEach(c => c.classList.remove('active'));
+                    card.classList.add('active');
+                    selectedTrackIndex = idx;
+                    if (window.soundEngine) {
+                        window.soundEngine.resume();
+                        window.soundEngine.playHop();
+                    }
+                });
+                trackGrid.appendChild(card);
+            });
+        }
+
+        // Roster Customization with Animation Types
+        const rosterGrid = document.getElementById('rosterGrid');
+        function renderRoster() {
+            if (!rosterGrid) return;
+            rosterGrid.innerHTML = '';
+
+            game.rosterConfig.forEach((slot, idx) => {
+                const profile = ANIMAL_PROFILES[slot.animalId] || ANIMAL_PROFILES.panda;
+                const card = document.createElement('div');
+                card.className = `roster-card ${slot.enabled ? '' : 'disabled'}`;
+
+                let speciesOptions = '';
+                Object.keys(ANIMAL_PROFILES).forEach(key => {
+                    const p = ANIMAL_PROFILES[key];
+                    const isSel = (key === slot.animalId) ? 'selected' : '';
+                    speciesOptions += `<option value="${key}" ${isSel}>${p.avatar} ${p.name} (${p.title})</option>`;
+                });
+
+                let animOptions = '';
+                ANIMATION_TYPES.forEach(a => {
+                    const isSel = (a.id === slot.animType) ? 'selected' : '';
+                    animOptions += `<option value="${a.id}" ${isSel}>${a.name} (${a.desc})</option>`;
+                });
+
+                card.innerHTML = `
+                    <div class="roster-card-top">
+                        <div class="roster-animal-avatar" id="avatar_${idx}">${profile.avatar}</div>
+                        <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+                            <span style="font-size:12px; font-weight:700;">${slot.enabled ? 'Active' : 'Off'}</span>
+                            <div class="switch">
+                                <input type="checkbox" id="toggle_${idx}" ${slot.enabled ? 'checked' : ''}>
+                                <span class="slider"></span>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div>
+                        <label style="font-size:11px; font-weight:700; color:var(--text-secondary); text-transform:uppercase;">Racer Name</label>
+                        <input type="text" class="roster-name-input" id="nameInput_${idx}" value="${slot.name}" maxlength="16">
+                    </div>
+
+                    <div>
+                        <label style="font-size:11px; font-weight:700; color:var(--text-secondary); text-transform:uppercase;">Player Type</label>
+                        <div class="type-toggle-group">
+                            <button class="type-btn ${slot.isHuman ? 'active human' : ''}" id="btnHuman_${idx}">HUMAN</button>
+                            <button class="type-btn ${!slot.isHuman ? 'active bot' : ''}" id="btnBot_${idx}">BOT</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label style="font-size:11px; font-weight:700; color:var(--text-secondary); text-transform:uppercase;">Animal Species</label>
+                        <select class="animal-select" id="animalSelect_${idx}">
+                            ${speciesOptions}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label style="font-size:11px; font-weight:700; color:var(--text-secondary); text-transform:uppercase;">Animation Type</label>
+                        <select class="anim-style-select" id="animSelect_${idx}">
+                            ${animOptions}
+                        </select>
+                    </div>
+                `;
+
+                const toggleInput = card.querySelector(`#toggle_${idx}`);
+                toggleInput.addEventListener('change', (e) => {
+                    slot.enabled = e.target.checked;
+                    card.classList.toggle('disabled', !slot.enabled);
+                    card.querySelector('label span').innerText = slot.enabled ? 'Active' : 'Off';
+                    if (window.soundEngine) window.soundEngine.playHop();
+                });
+
+                const nameInput = card.querySelector(`#nameInput_${idx}`);
+                nameInput.addEventListener('input', (e) => {
+                    slot.name = e.target.value.trim() || profile.name;
+                });
+
+                const btnHuman = card.querySelector(`#btnHuman_${idx}`);
+                const btnBot = card.querySelector(`#btnBot_${idx}`);
+
+                btnHuman.addEventListener('click', () => {
+                    slot.isHuman = true;
+                    btnHuman.className = 'type-btn active human';
+                    btnBot.className = 'type-btn';
+                    if (window.soundEngine) window.soundEngine.playAnimalCry(slot.animalId);
+                });
+
+                btnBot.addEventListener('click', () => {
+                    slot.isHuman = false;
+                    btnBot.className = 'type-btn active bot';
+                    btnHuman.className = 'type-btn';
+                    if (window.soundEngine) window.soundEngine.playHop();
+                });
+
+                const animalSelect = card.querySelector(`#animalSelect_${idx}`);
+                animalSelect.addEventListener('change', (e) => {
+                    slot.animalId = e.target.value;
+                    const newP = ANIMAL_PROFILES[slot.animalId];
+                    card.querySelector(`#avatar_${idx}`).innerText = newP.avatar;
+                    nameInput.value = newP.name;
+                    slot.name = newP.name;
+                    slot.animType = newP.defaultAnim;
+                    card.querySelector(`#animSelect_${idx}`).value = newP.defaultAnim;
+                    if (window.soundEngine) window.soundEngine.playAnimalCry(slot.animalId);
+                });
+
+                const animSelect = card.querySelector(`#animSelect_${idx}`);
+                animSelect.addEventListener('change', (e) => {
+                    slot.animType = e.target.value;
+                    if (window.soundEngine) window.soundEngine.playHop();
+                });
+
+                rosterGrid.appendChild(card);
+            });
+        }
+        renderRoster();
+
+        // Start Race Button
+        const startRaceBtn = document.getElementById('startRaceBtn');
+        if (startRaceBtn) {
+            startRaceBtn.addEventListener('click', () => {
+                isCupMode = false;
+                game.startNewRaceFlow(selectedTrackIndex);
+            });
+        }
+
+        // Skip Controls Button
+        const skipControlsBtn = document.getElementById('skipControlsBtn');
+        if (skipControlsBtn) {
+            skipControlsBtn.addEventListener('click', () => {
+                game.skipControlsPrompt();
+            });
+        }
+
+        // Resume Race Button
+        const resumeRaceBtn = document.getElementById('resumeRaceBtn');
+        if (resumeRaceBtn) {
+            resumeRaceBtn.addEventListener('click', () => {
+                game.resumeGame();
+            });
+        }
+
+        // New Game Button
+        const newGameBtn = document.getElementById('newGameBtn');
+        if (newGameBtn) {
+            newGameBtn.addEventListener('click', () => {
+                if (window.soundEngine) window.soundEngine.playHop();
+                isCupMode = false;
+                game.startNewRaceFlow(selectedTrackIndex);
+            });
+        }
+
+        // Grand Prix (5-Track Cup)
+        const grandPrixBtn = document.getElementById('grandPrixBtn');
+        if (grandPrixBtn) {
+            grandPrixBtn.addEventListener('click', () => {
+                isCupMode = true;
+                cupCurrentRace = 0;
+                game.startNewRaceFlow(0);
+            });
+        }
+
+        // Customize Button
+        const customizeBtn = document.getElementById('customizeBtn');
+        if (customizeBtn) {
+            customizeBtn.addEventListener('click', () => {
+                document.getElementById('mainMenu').style.display = 'none';
+                document.getElementById('customizeScreen').style.display = 'flex';
+                if (window.soundEngine) window.soundEngine.resume();
+            });
+        }
+
+        // Save & Back Button
+        const saveCustomizeBtn = document.getElementById('saveCustomizeBtn');
+        if (saveCustomizeBtn) {
+            saveCustomizeBtn.addEventListener('click', () => {
+                document.getElementById('customizeScreen').style.display = 'none';
+                document.getElementById('mainMenu').style.display = 'flex';
+                if (window.soundEngine) window.soundEngine.playHop();
+            });
+        }
+
+        // Pause Button on HUD
+        const hudPauseBtn = document.getElementById('hudPauseBtn');
+        if (hudPauseBtn) {
+            hudPauseBtn.addEventListener('click', () => {
+                game.pauseGame();
+            });
+        }
+
+        // Modal Resume Button
+        const modalResumeBtn = document.getElementById('modalResumeBtn');
+        if (modalResumeBtn) {
+            modalResumeBtn.addEventListener('click', () => {
+                game.resumeGame();
+            });
+        }
+
+        // Modal Restart Race Button
+        const modalRestartBtn = document.getElementById('modalRestartBtn');
+        if (modalRestartBtn) {
+            modalRestartBtn.addEventListener('click', () => {
+                document.getElementById('pauseModal').style.display = 'none';
+                game.startNewRaceFlow(selectedTrackIndex);
+            });
+        }
+
+        // Modal New Game Button
+        const modalNewGameBtn = document.getElementById('modalNewGameBtn');
+        if (modalNewGameBtn) {
+            modalNewGameBtn.addEventListener('click', () => {
+                game.newGame();
+            });
+        }
+
+        // Podium Next / Rematch Button
+        const podiumNextBtn = document.getElementById('podiumNextBtn');
+        if (podiumNextBtn) {
+            podiumNextBtn.addEventListener('click', () => {
+                document.getElementById('podiumScreen').style.display = 'none';
+                if (isCupMode) {
+                    cupCurrentRace++;
+                    if (cupCurrentRace < game.tracks.length) {
+                        game.startNewRaceFlow(cupCurrentRace);
+                    } else {
+                        isCupMode = false;
+                        game.newGame();
+                    }
+                } else {
+                    game.startNewRaceFlow(selectedTrackIndex);
+                }
+            });
+        }
+
+        // Podium Menu Button
+        const podiumMenuBtn = document.getElementById('podiumMenuBtn');
+        if (podiumMenuBtn) {
+            podiumMenuBtn.addEventListener('click', () => {
+                game.newGame();
+            });
+        }
+
+        // Theme Toggle Button
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+        if (themeToggleBtn) {
+            themeToggleBtn.addEventListener('click', () => {
+                game.toggleTheme();
+                if (window.soundEngine) window.soundEngine.playHop();
+            });
+        }
+
+        // Sound Toggle Button
+        const soundToggleBtn = document.getElementById('soundToggleBtn');
+        if (soundToggleBtn) {
+            soundToggleBtn.addEventListener('click', () => {
+                if (window.soundEngine) {
+                    window.soundEngine.resume();
+                    const muted = window.soundEngine.toggleMute();
+                    soundToggleBtn.innerHTML = muted ? '🔇 Sound OFF' : '🔊 Sound ON';
+                }
+            });
+        }
+
+        // Help Modal
+        const helpBtn = document.getElementById('helpBtn');
+        const helpModal = document.getElementById('helpModal');
+        const closeHelpBtn = document.getElementById('closeHelpBtn');
+
+        if (helpBtn && helpModal) {
+            helpBtn.addEventListener('click', () => {
+                helpModal.style.display = 'flex';
+                if (window.soundEngine) window.soundEngine.resume();
+            });
+        }
+        if (closeHelpBtn && helpModal) {
+            closeHelpBtn.addEventListener('click', () => {
+                helpModal.style.display = 'none';
+                if (window.soundEngine) window.soundEngine.playHop();
+            });
+        }
+
+        // Mobile Options Modal & Triggers
+        const mobileOptionsBtn = document.getElementById('mobileOptionsBtn');
+        const openMobileModalBtn = document.getElementById('openMobileModalBtn');
+        const modalMobileBtn = document.getElementById('modalMobileBtn');
+        const mobileOptionsModal = document.getElementById('mobileOptionsModal');
+        const closeMobileModalBtn = document.getElementById('closeMobileModalBtn');
+
+        const openMobileModal = () => {
+            if (mobileOptionsModal) mobileOptionsModal.style.display = 'flex';
+            if (window.soundEngine) window.soundEngine.resume();
+            game.applyMobileSettings();
+        };
+
+        const closeMobileModal = () => {
+            if (mobileOptionsModal) mobileOptionsModal.style.display = 'none';
+            if (window.soundEngine) window.soundEngine.playHop();
+        };
+
+        if (mobileOptionsBtn) mobileOptionsBtn.addEventListener('click', openMobileModal);
+        if (openMobileModalBtn) openMobileModalBtn.addEventListener('click', openMobileModal);
+        if (modalMobileBtn) modalMobileBtn.addEventListener('click', openMobileModal);
+        if (closeMobileModalBtn) closeMobileModalBtn.addEventListener('click', closeMobileModal);
+
+        // Helper to bind button group selectors
+        const bindOptGroup = (groupId, attr, callback) => {
+            const grp = document.getElementById(groupId);
+            if (!grp) return;
+            grp.querySelectorAll('.opt-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    callback(btn.dataset[attr]);
+                });
+            });
+        };
+
+        // Mobile Mode: auto, always, off
+        bindOptGroup('menuMobileModeGroup', 'mode', (val) => game.setMobileOption('mode', val));
+        bindOptGroup('modalMobileModeGroup', 'mode', (val) => game.setMobileOption('mode', val));
+
+        // Button Size: normal, large, jumbo
+        bindOptGroup('menuMobileSizeGroup', 'size', (val) => game.setMobileOption('size', val));
+        bindOptGroup('modalMobileSizeGroup', 'size', (val) => game.setMobileOption('size', val));
+
+        // Auto-Run: true, false
+        bindOptGroup('menuMobileAutoRunGroup', 'autorun', (val) => game.setMobileOption('autoRun', val === 'true'));
+        bindOptGroup('modalMobileAutoRunGroup', 'autorun', (val) => game.setMobileOption('autoRun', val === 'true'));
+
+        // Haptics: true, false
+        bindOptGroup('menuMobileHapticsGroup', 'haptics', (val) => game.setMobileOption('haptics', val === 'true'));
+        bindOptGroup('modalMobileHapticsGroup', 'haptics', (val) => game.setMobileOption('haptics', val === 'true'));
+
+        // Hand Swap & Opacity
+        bindOptGroup('modalMobileHandGroup', 'swap', (val) => game.setMobileOption('swapHands', val === 'true'));
+        bindOptGroup('modalMobileOpacityGroup', 'opacity', (val) => game.setMobileOption('opacity', val));
+
+        // Test Vibrate Button
+        const testHapticBtn = document.getElementById('testHapticBtn');
+        if (testHapticBtn) {
+            testHapticBtn.addEventListener('click', () => {
+                game.triggerHaptic(60);
+                if (window.soundEngine) window.soundEngine.playHop();
+            });
+        }
+    });
+    </script>
+</body>
+</html>
